@@ -16,7 +16,8 @@ export default function Match() {
 
   const handleSelectServer = (channel) => {
     setActiveChannel(channel)
-    setStreamUrl(channel.link || channel.mobile_link)
+    // mobile_link = stream direct, link = wrapper score808
+    setStreamUrl(channel.mobile_link || channel.link)
   }
 
   if (loading) {

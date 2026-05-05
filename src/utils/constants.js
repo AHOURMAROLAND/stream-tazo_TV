@@ -10,3 +10,8 @@ export const MATCH_STATUS = {
 }
 
 export const REFRESH_INTERVAL = 30000  // 30s
+
+// apifootball.com — clé gratuite à obtenir sur https://apifootball.com/documentation/
+// Remplace par ta clé après inscription
+export const APIFOOTBALL_KEY = import.meta.env.VITE_APIFOOTBALL_KEY || ''
+export const APIFOOTBALL_BASE = 'https://apiv3.apifootball.com'

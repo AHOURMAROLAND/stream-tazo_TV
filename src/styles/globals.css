@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --color-tazo-bg:      #0a0e1a;
+  --color-tazo-surface: #111827;
+  --color-tazo-card:    #1a2235;
+  --color-tazo-border:  #1e2d45;
+  --color-tazo-accent:  #00d4ff;
+  --color-tazo-red:     #e63946;
+  --color-tazo-green:   #22c55e;
+  --color-tazo-orange:  #f97316;
+  --color-tazo-text:    #e2e8f0;
+  --color-tazo-muted:   #64748b;
+
+  --font-display: 'Bebas Neue', cursive;
+  --font-body:    'Syne', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+
+  --animate-pulse-live: pulse 1s cubic-bezier(0.4,0,0.6,1) infinite;
+  --animate-slide-up:   slideUp 0.4s ease-out;
+  --animate-fade-in:    fadeIn 0.3s ease-out;
+
+  @keyframes slideUp {
+    0%   { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #0a0e1a;
+  color: #e2e8f0;
+  font-family: 'Syne', sans-serif;
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #0a0e1a; }
+::-webkit-scrollbar-thumb { background: #00d4ff; border-radius: 2px; }
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background: #e63946;
+  border-radius: 50%;
+  animation: pulse 1s infinite;
+}

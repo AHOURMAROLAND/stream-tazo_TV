@@ -1,6 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
-
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @theme {
   --color-tazo-bg:      #0a0e1a;
@@ -14,9 +13,9 @@
   --color-tazo-text:    #e2e8f0;
   --color-tazo-muted:   #64748b;
 
-  --font-display: 'Bebas Neue', cursive;
-  --font-body:    'Syne', sans-serif;
-  --font-mono:    'JetBrains Mono', monospace;
+  --font-family-display: 'Bebas Neue', cursive;
+  --font-family-body:    'Syne', sans-serif;
+  --font-family-mono:    'JetBrains Mono', monospace;
 
   --animate-pulse-live: pulse 1s cubic-bezier(0.4,0,0.6,1) infinite;
   --animate-slide-up:   slideUp 0.4s ease-out;

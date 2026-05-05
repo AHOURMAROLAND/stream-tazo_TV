@@ -60,9 +60,6 @@ export default function Match() {
   const isFinished = parseInt(match.status) === 2
   const scores     = match.score && match.score !== '-' ? match.score.split(' - ') : ['-', '-']
 
-  // Debug — à retirer après
-  console.log('MATCH DATA:', match)
-  console.log('CHANNELS:', match.channels)
 
   return (
     <div className="min-h-screen flex flex-col bg-tazo-bg">

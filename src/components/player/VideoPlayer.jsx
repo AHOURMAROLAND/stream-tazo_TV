@@ -30,10 +30,6 @@ export default function VideoPlayer({ src }) {
         maxBufferSize:           60 * 1000 * 1000,
         fragLoadingMaxRetry:     6,
         manifestLoadingMaxRetry: 4,
-        xhrSetup: (xhr) => {
-          xhr.setRequestHeader('Origin',  'https://vip.kora-top.zip')
-          xhr.setRequestHeader('Referer', 'https://vip.kora-top.zip/')
-        },
       })
 
       hls.loadSource(src)

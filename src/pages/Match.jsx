@@ -1,11 +1,12 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import VideoPlayer from '../components/player/VideoPlayer'
 import ServerList from '../components/player/ServerList'
 import MatchBadge from '../components/matches/MatchBadge'
 import useMatch from '../hooks/useMatch'
+import { MatchPageSkeleton } from '../components/ui/Skeleton'
 
 export default function Match() {
   const { id }   = useParams()
@@ -23,16 +24,10 @@ export default function Match() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col bg-tazo-bg">
+        <div className="ambient-top" />
         <Header />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="flex flex-col items-center gap-4">
-            <div className="relative w-14 h-14">
-              <div className="absolute inset-0 rounded-full border-2 border-tazo-border" />
-              <div className="absolute inset-0 rounded-full border-2 border-tazo-accent border-t-transparent animate-spin" />
-            </div>
-            <span className="text-tazo-muted2 text-xs font-mono tracking-widest uppercase">Chargement...</span>
-          </div>
-        </div>
+        <MatchPageSkeleton />
+        <Footer />
       </div>
     )
   }
@@ -59,6 +54,24 @@ export default function Match() {
   const isLive     = parseInt(match.status) === 1
   const isFinished = parseInt(match.status) === 2
   const scores     = match.score && match.score !== '-' ? match.score.split(' - ') : ['-', '-']
+
+  // Preconnect to all channel domains as soon as the match loads
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useEffect(() => {
+    if (!match?.channels?.length) return
+    match.channels.forEach((ch) => {
+      const url = ch.mobile_link || ch.link
+      if (!url) return
+      try {
+        const { origin } = new URL(url)
+        if (document.querySelector(`link[href="${origin}"]`)) return
+        const link = document.createElement('link')
+        link.rel  = 'preconnect'
+        link.href = origin
+        document.head.appendChild(link)
+      } catch (_) {}
+    })
+  }, [match?.channels])
 
 
   return (

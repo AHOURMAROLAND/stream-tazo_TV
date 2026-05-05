@@ -1,29 +1,42 @@
 import { getYesterday, getToday, getTomorrow } from '../../utils/time'
 
 const TABS = [
-  { label: 'Hier',        date: getYesterday() },
-  { label: "Aujourd'hui", date: getToday()      },
-  { label: 'Demain',      date: getTomorrow()   },
+  { label: 'Hier',        emoji: '◀',  date: getYesterday() },
+  { label: "Aujourd'hui", emoji: '●',  date: getToday()     },
+  { label: 'Demain',      emoji: '▶',  date: getTomorrow()  },
 ]
 
 export default function MatchFilter({ activeDate, onChange }) {
   return (
-    <div className="flex gap-2 mb-6">
-      {TABS.map((tab) => (
-        <button
-          key={tab.date}
-          onClick={() => onChange(tab.date)}
-          className={`
-            px-4 py-2 rounded-lg text-sm font-medium font-mono transition-all duration-200
-            ${activeDate === tab.date
-              ? 'bg-tazo-accent text-tazo-bg font-bold'
-              : 'bg-tazo-card text-tazo-muted border border-tazo-border hover:border-tazo-accent hover:text-tazo-accent'
-            }
-          `}
-        >
-          {tab.label}
-        </button>
-      ))}
+    <div className="flex gap-2 mb-8 p-1 bg-tazo-surface/60 rounded-2xl border border-tazo-border/50 w-fit">
+      {TABS.map((tab) => {
+        const isActive = activeDate === tab.date
+        return (
+          <button
+            key={tab.date}
+            onClick={() => onChange(tab.date)}
+            className={`
+              relative px-5 py-2.5 rounded-xl text-sm font-mono font-medium
+              transition-all duration-250 overflow-hidden
+              ${isActive
+                ? 'text-tazo-bg'
+                : 'text-tazo-muted2 hover:text-tazo-text'
+              }
+            `}
+          >
+            {isActive && (
+              <>
+                <span className="absolute inset-0 bg-gradient-to-br from-tazo-accent to-tazo-accent2 rounded-xl" />
+                <span className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent rounded-xl" />
+              </>
+            )}
+            <span className="relative flex items-center gap-2">
+              <span className={`text-[10px] ${isActive ? 'opacity-80' : 'opacity-40'}`}>{tab.emoji}</span>
+              {tab.label}
+            </span>
+          </button>
+        )
+      })}
     </div>
   )
 }

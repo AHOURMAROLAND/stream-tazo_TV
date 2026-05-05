@@ -2,57 +2,140 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @theme {
-  --color-tazo-bg:      #0a0e1a;
-  --color-tazo-surface: #111827;
-  --color-tazo-card:    #1a2235;
+  --color-tazo-bg:      #080c18;
+  --color-tazo-surface: #0d1220;
+  --color-tazo-card:    #111827;
+  --color-tazo-card2:   #161f30;
   --color-tazo-border:  #1e2d45;
+  --color-tazo-border2: #243450;
   --color-tazo-accent:  #00d4ff;
+  --color-tazo-accent2: #0099cc;
   --color-tazo-red:     #e63946;
   --color-tazo-green:   #22c55e;
   --color-tazo-orange:  #f97316;
   --color-tazo-text:    #e2e8f0;
-  --color-tazo-muted:   #64748b;
+  --color-tazo-muted:   #4a5568;
+  --color-tazo-muted2:  #64748b;
 
   --font-family-display: 'Bebas Neue', cursive;
   --font-family-body:    'Syne', sans-serif;
   --font-family-mono:    'JetBrains Mono', monospace;
 
-  --animate-pulse-live: pulse 1s cubic-bezier(0.4,0,0.6,1) infinite;
-  --animate-slide-up:   slideUp 0.4s ease-out;
-  --animate-fade-in:    fadeIn 0.3s ease-out;
+  --animate-pulse-live: pulse-live 1.2s ease-in-out infinite;
+  --animate-slide-up:   slideUp 0.5s cubic-bezier(0.16,1,0.3,1);
+  --animate-fade-in:    fadeIn 0.4s ease-out;
+  --animate-glow:       glow 2s ease-in-out infinite alternate;
+  --animate-shimmer:    shimmer 2s linear infinite;
 
+  @keyframes pulse-live {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.4; transform: scale(0.85); }
+  }
   @keyframes slideUp {
-    0%   { opacity: 0; transform: translateY(20px); }
+    0%   { opacity: 0; transform: translateY(24px); }
     100% { opacity: 1; transform: translateY(0); }
   }
-
   @keyframes fadeIn {
     0%   { opacity: 0; }
     100% { opacity: 1; }
   }
+  @keyframes glow {
+    0%   { box-shadow: 0 0 20px rgba(0,212,255,0.15); }
+    100% { box-shadow: 0 0 40px rgba(0,212,255,0.35); }
+  }
+  @keyframes shimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
 }
 
-* {
+*, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+html { scroll-behavior: smooth; }
+
 body {
-  background-color: #0a0e1a;
+  background-color: #080c18;
   color: #e2e8f0;
   font-family: 'Syne', sans-serif;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: #0a0e1a; }
-::-webkit-scrollbar-thumb { background: #00d4ff; border-radius: 2px; }
+/* Scrollbar */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: linear-gradient(#00d4ff, #0099cc); border-radius: 2px; }
 
-.live-dot {
-  width: 8px;
-  height: 8px;
-  background: #e63946;
-  border-radius: 50%;
-  animation: pulse 1s infinite;
+/* Noise texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+}
+
+/* Ambient glow blobs */
+.ambient-top {
+  position: fixed;
+  top: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 400px;
+  background: radial-gradient(ellipse, rgba(0,212,255,0.06) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Glass card */
+.glass {
+  background: rgba(17, 24, 39, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(30, 45, 69, 0.8);
+}
+
+/* Shimmer text */
+.shimmer-text {
+  background: linear-gradient(90deg, #00d4ff 0%, #ffffff 40%, #00d4ff 60%, #ffffff 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s linear infinite;
+}
+
+/* Live badge glow */
+.live-glow {
+  box-shadow: 0 0 12px rgba(230, 57, 70, 0.6), 0 0 24px rgba(230, 57, 70, 0.2);
+}
+
+/* Card hover glow */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card-hover:hover {
+  box-shadow: 0 8px 32px rgba(0, 212, 255, 0.12), 0 0 0 1px rgba(0, 212, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Accent glow button */
+.btn-accent {
+  background: linear-gradient(135deg, #00d4ff, #0099cc);
+  box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
+  transition: all 0.2s ease;
+}
+.btn-accent:hover {
+  box-shadow: 0 6px 28px rgba(0, 212, 255, 0.5);
+  transform: translateY(-1px);
 }

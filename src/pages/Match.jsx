@@ -15,9 +15,25 @@ export default function Match() {
   const [activeChannel, setActiveChannel] = useState(null)
   const [streamUrl, setStreamUrl]         = useState(null)
 
+  // Preconnect to all channel domains — must be before any early return
+  useEffect(() => {
+    if (!match?.channels?.length) return
+    match.channels.forEach((ch) => {
+      const url = ch.mobile_link || ch.link
+      if (!url) return
+      try {
+        const { origin } = new URL(url)
+        if (document.querySelector(`link[href="${origin}"]`)) return
+        const link = document.createElement('link')
+        link.rel  = 'preconnect'
+        link.href = origin
+        document.head.appendChild(link)
+      } catch (_) {}
+    })
+  }, [match?.channels])
+
   const handleSelectServer = (channel) => {
     setActiveChannel(channel)
-    // mobile_link = stream direct, link = wrapper score808
     setStreamUrl(channel.mobile_link || channel.link)
   }
 
@@ -54,25 +70,6 @@ export default function Match() {
   const isLive     = parseInt(match.status) === 1
   const isFinished = parseInt(match.status) === 2
   const scores     = match.score && match.score !== '-' ? match.score.split(' - ') : ['-', '-']
-
-  // Preconnect to all channel domains as soon as the match loads
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  useEffect(() => {
-    if (!match?.channels?.length) return
-    match.channels.forEach((ch) => {
-      const url = ch.mobile_link || ch.link
-      if (!url) return
-      try {
-        const { origin } = new URL(url)
-        if (document.querySelector(`link[href="${origin}"]`)) return
-        const link = document.createElement('link')
-        link.rel  = 'preconnect'
-        link.href = origin
-        document.head.appendChild(link)
-      } catch (_) {}
-    })
-  }, [match?.channels])
-
 
   return (
     <div className="min-h-screen flex flex-col bg-tazo-bg">

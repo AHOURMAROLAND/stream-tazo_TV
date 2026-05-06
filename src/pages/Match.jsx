@@ -246,11 +246,8 @@ export default function Match() {
 
         {/* Player section — always visible regardless of match status */}
         {match.channels && match.channels.length > 0 && (
-          <div className="relative overflow-hidden rounded-3xl">
-            <div className="absolute inset-0 bg-tazo-card" />
-            <div className="absolute inset-0 rounded-3xl border border-tazo-border/60" />
-
-            <div className="relative p-6 sm:p-8">
+          <div className="rounded-3xl border border-tazo-border/60 bg-tazo-card">
+            <div className="p-6 sm:p-8">
               <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-3">
                   <div className="w-1 h-5 rounded-full bg-tazo-accent/60" />

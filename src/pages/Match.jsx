@@ -229,10 +229,8 @@ export default function Match() {
               </div>
               <div className="flex items-center gap-2">
                 <MatchBadge status={match.status} />
-                {/* Share button — visible before and during match, hidden 30min after end */}
-                {!isExpired && (
-                  <ShareButton match={match} />
-                )}
+                {/* Share button — always visible */}
+                <ShareButton match={match} />
                 <FavoriteButton
                   isFav={isFavorite(match.id)}
                   onClick={() => toggleFavorite(match)}

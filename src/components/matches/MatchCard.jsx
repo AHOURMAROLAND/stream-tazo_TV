@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { formatTime } from '../../utils/time'
 import MatchBadge from './MatchBadge'
 import FavoriteButton from '../ui/FavoriteButton'
+import ShareButton from './ShareButton'
 import useFavorites from '../../hooks/useFavorites'
 import useTeamFavorites from '../../hooks/useTeamFavorites'
 import useAppStore from '../../store/useAppStore'
@@ -33,13 +34,13 @@ export default function MatchCard({ match, compact = false }) {
   if (compact) {
     return (
       <div
-        onClick={() => hasStream && navigate(`/match/${id}`)}
+        onClick={() => navigate(`/match/${id}`)}
         className={`
           flex items-center justify-between rounded-xl px-4 py-3
-          border transition-all duration-200
+          border transition-all duration-200 cursor-pointer
           ${hasStream
-            ? 'bg-tazo-card border-tazo-border hover:border-tazo-accent/50 cursor-pointer hover:bg-tazo-card2'
-            : 'bg-tazo-card/50 border-tazo-border/40 opacity-60 cursor-default'
+            ? 'bg-tazo-card border-tazo-border hover:border-tazo-accent/50 hover:bg-tazo-card2'
+            : 'bg-tazo-card/50 border-tazo-border/40 opacity-70 hover:opacity-90'
           }
           ${isLive ? 'border-tazo-red/25' : ''}
         `}
@@ -84,6 +85,7 @@ export default function MatchCard({ match, compact = false }) {
             isFav={isFavorite(id)}
             onClick={() => toggleFavorite(match)}
           />
+          <ShareButton match={match} compact />
         </div>
       </div>
     )
@@ -92,12 +94,12 @@ export default function MatchCard({ match, compact = false }) {
   // ── Card / grid mode ───────────────────────────────────────────
   return (
     <div
-      onClick={() => hasStream && navigate(`/match/${id}`)}
+      onClick={() => navigate(`/match/${id}`)}
       className={`
         relative overflow-hidden rounded-2xl
-        transition-all duration-300
-        ${hasStream ? 'cursor-pointer card-hover' : 'opacity-50 cursor-default'}
-        ${isLive && hasStream ? 'card-live-border' : ''}
+        transition-all duration-300 cursor-pointer
+        ${hasStream ? 'card-hover' : 'opacity-60 hover:opacity-80'}
+        ${isLive ? 'card-live-border' : ''}
       `}
     >
       {/* Background layers */}
@@ -143,6 +145,7 @@ export default function MatchCard({ match, compact = false }) {
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             <MatchBadge status={status} />
+            <ShareButton match={match} compact />
             <FavoriteButton
               isFav={isFavorite(id)}
               onClick={() => toggleFavorite(match)}

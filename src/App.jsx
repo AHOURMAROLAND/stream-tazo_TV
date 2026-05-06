@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
+import { Analytics } from '@vercel/analytics/react'
 import Home from './pages/Home'
 import Match from './pages/Match'
 import NotFound from './pages/NotFound'
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="*"          element={<NotFound />} />
       </Routes>
       <MiniPlayer />
+      <Analytics />
     </div>
   )
 }

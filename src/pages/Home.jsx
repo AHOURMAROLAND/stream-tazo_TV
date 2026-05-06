@@ -116,15 +116,22 @@ export default function Home() {
 
           <div className="flex flex-col gap-3 mb-8">
             <DateSlider activeDate={date} onChange={setDate} />
-            <SearchBar query={query} onChange={setQuery} />
-            {!loading && leagues.length > 1 && (
-              <LeagueFilter
-                leagues={leagues}
-                active={league}
-                onChange={setLeague}
-                liveByLeague={liveByLeague}
-              />
-            )}
+            {/* Search + League filter — same row on desktop */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex-1">
+                <SearchBar query={query} onChange={setQuery} />
+              </div>
+              {!loading && leagues.length > 1 && (
+                <div className="sm:w-72 lg:w-80 flex-shrink-0">
+                  <LeagueFilter
+                    leagues={leagues}
+                    active={league}
+                    onChange={setLeague}
+                    liveByLeague={liveByLeague}
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           <MatchList

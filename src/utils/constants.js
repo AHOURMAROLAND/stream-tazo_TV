@@ -1,5 +1,5 @@
-export const KORA_BASE    = '/api-kora'
-export const MESHIFY_BASE = '/api-meshify'
+export const KORA_BASE    = 'https://kora-api.space'
+export const MESHIFY_BASE = 'https://us.meshify.cloud'
 export const CDN_LOGOS    = 'https://cdn.kora-api.space/uploads/team'
 export const CDN_LEAGUES  = 'https://cdn.kora-api.space/uploads/league'
 

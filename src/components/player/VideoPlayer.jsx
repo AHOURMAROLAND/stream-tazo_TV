@@ -141,7 +141,6 @@ export default function VideoPlayer({ src, onStreamError, onReady }) {
             key={src}
             src={src}
             className="absolute inset-0 w-full h-full border-0"
-            allowFullScreen
             allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
             sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
             title="TAZO TV Stream"

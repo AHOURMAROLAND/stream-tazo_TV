@@ -33,7 +33,7 @@ export default function Home() {
         {/* Hero */}
         <div className="relative overflow-hidden border-b border-tazo-border/30">
           <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{
-            backgroundImage: 'linear-gradient(rgba(0,212,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,1) 1px, transparent 1px)',
+            backgroundImage: 'linear-gradient(rgba(168,85,247,1) 1px, transparent 1px), linear-gradient(90deg, rgba(168,85,247,1) 1px, transparent 1px)',
             backgroundSize: '60px 60px'
           }} />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-tazo-bg pointer-events-none" />

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import Hls from 'hls.js'
-import { IconWifi, IconFullscreen, IconExitFullscreen } from '../ui/Icons'
+import { IconWifi } from '../ui/Icons'
 
 function preconnect(url) {
   if (!url) return
@@ -20,8 +20,7 @@ export default function VideoPlayer({ src, onStreamError, onReady }) {
   const containerRef          = useRef(null)
   const [ready, setReady]     = useState(false)
   const [error, setError]     = useState(null)
-  const [isFullscreen, setIsFullscreen] = useState(false)
-  const [isOffline, setIsOffline]       = useState(!navigator.onLine)
+  const [isOffline, setIsOffline] = useState(!navigator.onLine)
 
   const isM3u8   = src && src.includes('.m3u8')
   const isIframe = src && !isM3u8
@@ -33,71 +32,41 @@ export default function VideoPlayer({ src, onStreamError, onReady }) {
     setError(null)
   }, [src])
 
-  // Notify parent when ready state changes (used by useAutoSwitch)
   useEffect(() => {
     if (onReady) onReady(ready)
   }, [ready])
 
   useEffect(() => {
-    const onChange = () => setIsFullscreen(!!document.fullscreenElement)
-    document.addEventListener('fullscreenchange', onChange)
-    return () => document.removeEventListener('fullscreenchange', onChange)
-  }, [])
-
-  useEffect(() => {
-    const off = () => setIsOffline(true)
-    const on  = () => setIsOffline(false)
-    window.addEventListener('offline', off)
-    window.addEventListener('online',  on)
-    return () => {
-      window.removeEventListener('offline', off)
-      window.removeEventListener('online',  on)
-    }
-  }, [])
-
-  useEffect(() => {
     const onKey = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return
-      if (e.key === 'f' || e.key === 'F') toggleFullscreen()
+      if (e.key === 'f' || e.key === 'F') containerRef.current?.requestFullscreen?.().catch(() => {})
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [isFullscreen])
+  }, [])
 
   // HLS setup
   useEffect(() => {
     if (!src || !videoRef.current || isIframe) return
-
     if (hlsRef.current) { hlsRef.current.destroy(); hlsRef.current = null }
-
     const video = videoRef.current
-
     if (Hls.isSupported()) {
       const hls = new Hls({
-        maxBufferLength:         30,
-        maxMaxBufferLength:      60,
-        maxBufferSize:           60 * 1000 * 1000,
-        fragLoadingMaxRetry:     6,
-        manifestLoadingMaxRetry: 4,
+        maxBufferLength: 30, maxMaxBufferLength: 60,
+        maxBufferSize: 60 * 1000 * 1000,
+        fragLoadingMaxRetry: 6, manifestLoadingMaxRetry: 4,
       })
       hls.loadSource(src)
       hls.attachMedia(video)
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        setReady(true)
-        video.play().catch(() => {})
-      })
+      hls.on(Hls.Events.MANIFEST_PARSED, () => { setReady(true); video.play().catch(() => {}) })
       hls.on(Hls.Events.ERROR, (_, data) => {
         if (data.fatal) { setError('Stream indisponible'); onStreamError?.() }
       })
       hlsRef.current = hls
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
       video.src = src
-      video.addEventListener('loadedmetadata', () => {
-        setReady(true)
-        video.play().catch(() => {})
-      })
+      video.addEventListener('loadedmetadata', () => { setReady(true); video.play().catch(() => {}) })
     }
-
     return () => { if (hlsRef.current) { hlsRef.current.destroy(); hlsRef.current = null } }
   }, [src])
 
@@ -128,7 +97,7 @@ export default function VideoPlayer({ src, onStreamError, onReady }) {
     return (
       <div
         ref={containerRef}
-        className="relative rounded-2xl overflow-hidden bg-black border border-tazo-border/60 group"
+        className="relative rounded-2xl overflow-hidden bg-black border border-tazo-border/60"
         style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.6)' }}
       >
         <div className="aspect-video relative">
@@ -159,7 +128,7 @@ export default function VideoPlayer({ src, onStreamError, onReady }) {
             </div>
           )}
 
-          {/* Iframe */}
+          {/* Iframe — full access, native controls */}
           <iframe
             key={src}
             src={src}
@@ -170,35 +139,6 @@ export default function VideoPlayer({ src, onStreamError, onReady }) {
             title="TAZO TV Stream"
             onLoad={() => setReady(true)}
           />
-
-          {/* Anti-pub edge overlays */}
-          <div className="absolute top-0    left-0 right-0  h-[10%] z-10" />
-          <div className="absolute bottom-0 left-0 right-0  h-[10%] z-10" />
-          <div className="absolute top-0    left-0 bottom-0 w-[8%]  z-10" />
-          <div className="absolute top-0    right-0 bottom-0 w-[8%] z-10" />
-
-          {/* Controls bar */}
-          {ready && (
-            <div className="absolute bottom-0 left-0 right-0 z-20 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-              <div className="h-12 bg-gradient-to-t from-black/80 to-transparent" />
-              <div className="bg-black/70 backdrop-blur-sm px-4 py-2.5 flex items-center justify-between">
-                <span className="text-white/30 text-[10px] font-mono flex items-center gap-1">
-                  <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-white/50 text-[10px]">F</kbd>
-                  Plein écran
-                </span>
-                <button
-                  onClick={toggleFullscreen}
-                  className="text-white/70 hover:text-white transition-colors p-1"
-                  title={isFullscreen ? 'Quitter (F)' : 'Plein écran (F)'}
-                >
-                  {isFullscreen
-                    ? <IconExitFullscreen className="w-5 h-5" />
-                    : <IconFullscreen className="w-5 h-5" />
-                  }
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     )

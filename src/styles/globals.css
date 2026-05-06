@@ -8,8 +8,8 @@
   --color-tazo-card2:   #161f30;
   --color-tazo-border:  #1e2d45;
   --color-tazo-border2: #243450;
-  --color-tazo-accent:  #00d4ff;
-  --color-tazo-accent2: #0099cc;
+  --color-tazo-accent:  #a855f7;
+  --color-tazo-accent2: #9333ea;
   --color-tazo-red:     #e63946;
   --color-tazo-green:   #22c55e;
   --color-tazo-orange:  #f97316;
@@ -63,8 +63,8 @@
     50%       { transform: translateY(-5px); }
   }
   @keyframes glow {
-    0%   { box-shadow: 0 0 20px rgba(0,212,255,0.15); }
-    100% { box-shadow: 0 0 40px rgba(0,212,255,0.35); }
+    0%   { box-shadow: 0 0 20px rgba(168,85,247,0.15); }
+    100% { box-shadow: 0 0 40px rgba(168,85,247,0.35); }
   }
   @keyframes shimmer {
     0%   { background-position: -200% center; }
@@ -126,7 +126,7 @@
   ::-webkit-scrollbar { width: 3px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb {
-    background: linear-gradient(#00d4ff, #0099cc);
+    background: linear-gradient(#a855f7, #9333ea);
     border-radius: 2px;
   }
 }
@@ -142,7 +142,7 @@
     transform: translateX(-50%);
     width: min(800px, 100vw);
     height: clamp(200px, 40vw, 400px);
-    background: radial-gradient(ellipse, rgba(0,212,255,0.06) 0%, transparent 70%);
+    background: radial-gradient(ellipse, rgba(168,85,247,0.06) 0%, transparent 70%);
     pointer-events: none;
     z-index: 0;
   }
@@ -157,7 +157,7 @@
 
   /* ── Shimmer text ───────────────────────────────────────────── */
   .shimmer-text {
-    background: linear-gradient(90deg, #00d4ff 0%, #ffffff 40%, #00d4ff 60%, #ffffff 100%);
+    background: linear-gradient(90deg, #a855f7 0%, #ffffff 40%, #a855f7 60%, #ffffff 100%);
     background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -177,8 +177,8 @@
   }
   .card-hover:hover {
     box-shadow:
-      0 8px 32px rgba(0, 212, 255, 0.12),
-      0 0 0 1px rgba(0, 212, 255, 0.2),
+      0 8px 32px rgba(168, 85, 247, 0.12),
+      0 0 0 1px rgba(168, 85, 247, 0.2),
       0 2px 8px rgba(0,0,0,0.4);
     transform: translateY(-3px);
   }
@@ -194,12 +194,12 @@
 
   /* ── Accent glow button ─────────────────────────────────────── */
   .btn-accent {
-    background: linear-gradient(135deg, #00d4ff, #0099cc);
-    box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
+    background: linear-gradient(135deg, #a855f7, #9333ea);
+    box-shadow: 0 4px 20px rgba(168, 85, 247, 0.3);
     transition: all 0.2s ease;
   }
   .btn-accent:hover {
-    box-shadow: 0 6px 28px rgba(0, 212, 255, 0.5);
+    box-shadow: 0 6px 28px rgba(168, 85, 247, 0.5);
     transform: translateY(-1px);
   }
   .btn-accent:active {
@@ -241,7 +241,7 @@
     top: 0;
     bottom: 0;
     width: 2px;
-    background: linear-gradient(to bottom, transparent, #00d4ff, transparent);
+    background: linear-gradient(to bottom, transparent, #a855f7, transparent);
     animation: fadeIn 0.3s ease both;
   }
 }

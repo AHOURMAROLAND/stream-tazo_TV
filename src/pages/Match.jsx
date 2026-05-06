@@ -165,7 +165,7 @@ export default function Match() {
             </>
           )}
           <div className="absolute inset-0 opacity-[0.025]" style={{
-            backgroundImage: 'linear-gradient(rgba(0,212,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,1) 1px, transparent 1px)',
+            backgroundImage: 'linear-gradient(rgba(168,85,247,1) 1px, transparent 1px), linear-gradient(90deg, rgba(168,85,247,1) 1px, transparent 1px)',
             backgroundSize: '40px 40px'
           }} />
           <div className={`absolute inset-0 rounded-3xl border ${isLive ? 'border-tazo-red/20' : 'border-tazo-border/60'}`} />

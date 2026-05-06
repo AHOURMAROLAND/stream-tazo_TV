@@ -6,8 +6,11 @@ import MatchFilter from '../components/matches/MatchFilter'
 import FavoritesList from '../components/matches/FavoritesList'
 import SearchBar from '../components/matches/SearchBar'
 import LeagueFilter from '../components/matches/LeagueFilter'
+import NotificationBell from '../components/ui/NotificationBell'
 import useMatches from '../hooks/useMatches'
 import useSearch from '../hooks/useSearch'
+import useFavorites from '../hooks/useFavorites'
+import useNotifications from '../hooks/useNotifications'
 import { getToday } from '../utils/time'
 
 export default function Home() {
@@ -15,6 +18,8 @@ export default function Home() {
   const [compact, setCompact] = useState(false)
   const { matches, loading, error } = useMatches(date)
   const { query, setQuery, league, setLeague, leagues, filtered } = useSearch(matches)
+  const { favorites } = useFavorites()
+  const { requestPermission } = useNotifications(matches, favorites)
 
   const live  = matches.filter((m) => parseInt(m.status) === 1).length
   const total = matches.length
@@ -65,6 +70,9 @@ export default function Home() {
                     </div>
                   </div>
                 )}
+
+                {/* Notification bell */}
+                <NotificationBell onRequest={requestPermission} />
 
                 {/* View toggle */}
                 <button

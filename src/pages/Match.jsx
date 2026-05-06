@@ -5,9 +5,17 @@ import Footer from '../components/layout/Footer'
 import VideoPlayer from '../components/player/VideoPlayer'
 import ServerList from '../components/player/ServerList'
 import MatchBadge from '../components/matches/MatchBadge'
+import MatchInfo from '../components/matches/MatchInfo'
+import Commentary from '../components/matches/Commentary'
+import MatchStats from '../components/matches/MatchStats'
+import FavoriteButton from '../components/ui/FavoriteButton'
 import useMatch from '../hooks/useMatch'
 import useAutoSwitch from '../hooks/useAutoSwitch'
 import useDocumentTitle from '../hooks/useDocumentTitle'
+import useKeyboardShortcuts from '../hooks/useKeyboardShortcuts'
+import useCommentary from '../hooks/useCommentary'
+import useMatchStats from '../hooks/useMatchStats'
+import useFavorites from '../hooks/useFavorites'
 
 export default function Match() {
   const { id }   = useParams()
@@ -18,9 +26,24 @@ export default function Match() {
   const [streamUrl, setStreamUrl]         = useState(null)
   const [switchMsg, setSwitchMsg]         = useState(null)
 
+  const { isFavorite, toggleFavorite } = useFavorites()
+
+  const isLive     = match ? parseInt(match.status) === 1 : false
+  const isFinished = match ? parseInt(match.status) === 2 : false
+
   useDocumentTitle(match)
 
-  // Preconnect to all channel domains as soon as match loads
+  const { events, loading: commLoading } = useCommentary(
+    match?.api_matche_id,
+    isLive
+  )
+
+  const { stats, ratings, loading: statsLoading } = useMatchStats(
+    match?.api_matche_id,
+    isFinished
+  )
+
+  // Preconnect to all channel domains
   useEffect(() => {
     if (!match?.channels?.length) return
     match.channels.forEach((ch) => {
@@ -37,7 +60,7 @@ export default function Match() {
     })
   }, [match?.channels])
 
-  // Auto-select first channel when match loads
+  // Auto-select first channel
   useEffect(() => {
     if (match?.channels?.length && !activeChannel) {
       handleSelectServer(match.channels[0])
@@ -61,6 +84,7 @@ export default function Match() {
   }
 
   useAutoSwitch(streamUrl, match?.channels, activeChannel, handleAutoSwitch)
+  useKeyboardShortcuts(match?.channels, activeChannel, handleSelectServer)
 
   // ── Loading ────────────────────────────────────────────────────
   if (loading) {
@@ -104,9 +128,9 @@ export default function Match() {
     )
   }
 
-  const isLive     = parseInt(match.status) === 1
-  const isFinished = parseInt(match.status) === 2
-  const scores     = match.score && match.score !== '-' ? match.score.split(' - ') : ['-', '-']
+  const scores = match.score && match.score !== '-'
+    ? match.score.split(' - ')
+    : ['-', '-']
 
   return (
     <div className="min-h-screen flex flex-col bg-tazo-bg">
@@ -141,7 +165,7 @@ export default function Match() {
           <div className={`absolute inset-0 rounded-3xl border ${isLive ? 'border-tazo-red/20' : 'border-tazo-border/60'}`} />
 
           <div className="relative p-6 sm:p-8">
-            {/* League + badge */}
+            {/* League + badge + favorite */}
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-tazo-surface border border-tazo-border/60 flex items-center justify-center overflow-hidden">
@@ -154,7 +178,13 @@ export default function Match() {
                 </div>
                 <span className="text-tazo-muted2 text-sm font-mono">{match.league_en}</span>
               </div>
-              <MatchBadge status={match.status} />
+              <div className="flex items-center gap-2">
+                <MatchBadge status={match.status} />
+                <FavoriteButton
+                  isFav={isFavorite(match.id)}
+                  onClick={() => toggleFavorite(match)}
+                />
+              </div>
             </div>
 
             {/* Teams + score */}
@@ -203,7 +233,6 @@ export default function Match() {
             <div className="absolute inset-0 rounded-3xl border border-tazo-border/60" />
 
             <div className="relative p-6 sm:p-8">
-              {/* Header */}
               <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-3">
                   <div className="w-1 h-5 rounded-full bg-tazo-accent/60" />
@@ -212,8 +241,6 @@ export default function Match() {
                     {match.channels.length}
                   </span>
                 </div>
-
-                {/* Auto-switch message */}
                 {switchMsg && (
                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-tazo-orange/10 border border-tazo-orange/20 animate-fade-in">
                     <span className="w-1.5 h-1.5 rounded-full bg-tazo-orange animate-pulse" />
@@ -229,21 +256,31 @@ export default function Match() {
               />
 
               <div className="mt-6">
-                <VideoPlayer
-                  src={streamUrl}
-                  onStreamError={handleStreamError}
-                />
+                <VideoPlayer src={streamUrl} onStreamError={handleStreamError} />
               </div>
             </div>
           </div>
         ) : (
           <div className="rounded-3xl border border-tazo-border/40 border-dashed p-12 flex flex-col items-center gap-3">
             <span className="text-3xl">📡</span>
-            <p className="text-tazo-muted2 font-mono text-sm">Aucun stream disponible pour ce match</p>
+            <p className="text-tazo-muted2 font-mono text-sm">Aucun stream disponible</p>
           </div>
         )}
-      </main>
 
+        {/* Commentary — live or finished */}
+        {(isLive || isFinished) && (
+          <Commentary events={events} loading={commLoading} />
+        )}
+
+        {/* Stats + player ratings — finished only */}
+        {isFinished && (
+          <MatchStats stats={stats} ratings={ratings} loading={statsLoading} />
+        )}
+
+        {/* Match info */}
+        <MatchInfo match={match} />
+
+      </main>
       <Footer />
     </div>
   )

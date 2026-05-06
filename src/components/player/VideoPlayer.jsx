@@ -97,35 +97,33 @@ export default function VideoPlayer({ src, onStreamError, onReady }) {
     return (
       <div
         ref={containerRef}
-        className="relative rounded-2xl overflow-hidden bg-black border border-tazo-border/60"
+        className="relative rounded-2xl bg-black border border-tazo-border/60"
         style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.6)' }}
       >
-        <div className="aspect-video relative">
-
-          {/* Offline overlay */}
-          {isOffline && (
-            <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-tazo-bg/95 backdrop-blur-sm">
-              <div className="w-16 h-16 rounded-2xl bg-tazo-card border border-tazo-red/30 flex items-center justify-center">
-                <IconWifi className="w-7 h-7 text-tazo-red" />
-              </div>
-              <div className="text-center">
-                <p className="font-display text-xl tracking-widest text-tazo-text mb-1">HORS LIGNE</p>
-                <p className="text-tazo-muted2 text-xs font-mono">Vérifiez votre connexion</p>
-              </div>
+        {/* Offline overlay */}
+        {isOffline && (
+          <div className="absolute inset-0 z-30 rounded-2xl flex flex-col items-center justify-center gap-4 bg-tazo-bg/95 backdrop-blur-sm">
+            <div className="w-16 h-16 rounded-2xl bg-tazo-card border border-tazo-red/30 flex items-center justify-center">
+              <IconWifi className="w-7 h-7 text-tazo-red" />
             </div>
-          )}
+            <div className="text-center">
+              <p className="font-display text-xl tracking-widest text-tazo-text mb-1">HORS LIGNE</p>
+              <p className="text-tazo-muted2 text-xs font-mono">Vérifiez votre connexion</p>
+            </div>
+          </div>
+        )}
 
-          {/* Iframe — full access, native controls */}
-          <iframe
-            key={src}
-            src={src}
-            className="w-full h-full border-0"
-            allowFullScreen
-            allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
-            title="TAZO TV Stream"
-          />
-        </div>
+        {/* Iframe — no overflow-hidden, controls fully visible */}
+        <iframe
+          key={src}
+          src={src}
+          className="w-full rounded-2xl border-0 block"
+          style={{ aspectRatio: '16/9' }}
+          allowFullScreen
+          allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
+          title="TAZO TV Stream"
+        />
       </div>
     )
   }

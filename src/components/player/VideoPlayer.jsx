@@ -30,9 +30,6 @@ export default function VideoPlayer({ src, onStreamError, onReady }) {
   useEffect(() => {
     setReady(false)
     setError(null)
-    // Force-dismiss spinner after 3s even if onLoad doesn't fire
-    const t = setTimeout(() => setReady(true), 3000)
-    return () => clearTimeout(t)
   }, [src])
 
   useEffect(() => {
@@ -118,19 +115,6 @@ export default function VideoPlayer({ src, onStreamError, onReady }) {
             </div>
           )}
 
-          {/* Loading spinner — disparaît après 3s max */}
-          {!ready && !isOffline && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-tazo-surface pointer-events-none">
-              <div className="relative w-14 h-14">
-                <div className="absolute inset-0 rounded-full border-2 border-tazo-border" />
-                <div className="absolute inset-0 rounded-full border-2 border-tazo-accent border-t-transparent animate-spin" />
-              </div>
-              <span className="text-tazo-muted2 text-xs font-mono tracking-widest uppercase animate-pulse">
-                Connexion au stream…
-              </span>
-            </div>
-          )}
-
           {/* Iframe — full access, native controls */}
           <iframe
             key={src}
@@ -140,7 +124,6 @@ export default function VideoPlayer({ src, onStreamError, onReady }) {
             allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
             sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
             title="TAZO TV Stream"
-            onLoad={() => setReady(true)}
           />
         </div>
       </div>

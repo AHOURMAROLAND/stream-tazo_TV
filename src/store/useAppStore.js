@@ -3,12 +3,22 @@ import { create } from 'zustand'
 const useAppStore = create((set, get) => ({
   timezone:    0,
   lang:        'en',
+  theme:       localStorage.getItem('tazo_theme') || 'dark',
   activeMatch: null,
   favorites:   JSON.parse(localStorage.getItem('tazo_favorites') || '[]'),
+  miniPlayer:  null, // { matchId, src, homeName, awayName, homeLogo, awayLogo, score, isLive }
 
   setTimezone:    (tz)    => set({ timezone: tz }),
   setLang:        (lang)  => set({ lang }),
   setActiveMatch: (match) => set({ activeMatch: match }),
+
+  setTheme: (theme) => {
+    localStorage.setItem('tazo_theme', theme)
+    set({ theme })
+  },
+
+  setMiniPlayer:   (data) => set({ miniPlayer: data }),
+  clearMiniPlayer: ()     => set({ miniPlayer: null }),
 
   toggleFavorite: (match) => {
     const favs = get().favorites

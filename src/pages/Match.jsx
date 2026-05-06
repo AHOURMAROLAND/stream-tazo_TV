@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import VideoPlayer from '../components/player/VideoPlayer'
@@ -20,6 +20,7 @@ import useCommentary from '../hooks/useCommentary'
 import useMatchStats from '../hooks/useMatchStats'
 import useFavorites from '../hooks/useFavorites'
 import useTeamFavorites from '../hooks/useTeamFavorites'
+import useAppStore from '../store/useAppStore'
 
 export default function Match() {
   const { id }   = useParams()
@@ -32,11 +33,44 @@ export default function Match() {
   const [iframeReady, setIframeReady]     = useState(false)
   const [selectedTeam, setSelectedTeam]   = useState(null)
 
-  const { isFavorite, toggleFavorite } = useFavorites()
-  const { isTeamFav, toggleTeam }      = useTeamFavorites()
+  const { isFavorite, toggleFavorite }   = useFavorites()
+  const { isTeamFav, toggleTeam }        = useTeamFavorites()
+  const { setMiniPlayer, clearMiniPlayer } = useAppStore()
+
+  // Refs to capture latest values inside cleanup without stale closures
+  const streamRef = useRef(null)
+  const matchRef  = useRef(null)
 
   const isLive     = match ? parseInt(match.status) === 1 : false
   const isFinished = match ? parseInt(match.status) === 2 : false
+
+  // Keep matchRef up-to-date
+  useEffect(() => { if (match) matchRef.current = match }, [match])
+
+  // Clear any existing mini-player when entering this Match page
+  useEffect(() => {
+    clearMiniPlayer()
+  }, [])
+
+  // On unmount: if a live stream was active, trigger mini-player
+  useEffect(() => {
+    return () => {
+      const m   = matchRef.current
+      const url = streamRef.current
+      if (url && m && parseInt(m.status) === 1) {
+        setMiniPlayer({
+          matchId:  m.id,
+          src:      url,
+          homeName: m.home_en,
+          awayName: m.away_en,
+          homeLogo: `https://cdn.kora-api.space/uploads/team/${m.home_logo}`,
+          awayLogo: `https://cdn.kora-api.space/uploads/team/${m.away_logo}`,
+          score:    m.score,
+          isLive:   true,
+        })
+      }
+    }
+  }, [])
 
   useDocumentTitle(match)
 
@@ -75,10 +109,12 @@ export default function Match() {
   }, [match])
 
   const handleSelectServer = (channel) => {
+    const url = channel.mobile_link || channel.link || null
+    streamRef.current = url        // keep latest url for mini-player cleanup
     setActiveChannel(channel)
-    setStreamUrl(channel.mobile_link || channel.link || null)
+    setStreamUrl(url)
     setSwitchMsg(null)
-    setIframeReady(false) // reset ready on server change
+    setIframeReady(false)
   }
 
   const handleStreamError = () => {

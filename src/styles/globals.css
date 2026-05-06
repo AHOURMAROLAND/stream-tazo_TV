@@ -1,6 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
+/* ─── Light mode token overrides ────────────────────────────────────────── */
+[data-theme="light"] {
+  --color-tazo-bg:      #f8fafc;
+  --color-tazo-surface: #f1f5f9;
+  --color-tazo-card:    #ffffff;
+  --color-tazo-card2:   #f8fafc;
+  --color-tazo-border:  #cbd5e1;
+  --color-tazo-border2: #94a3b8;
+  --color-tazo-accent:  #7c3aed;
+  --color-tazo-accent2: #6d28d9;
+  --color-tazo-text:    #0f172a;
+  --color-tazo-muted:   #94a3b8;
+  --color-tazo-muted2:  #64748b;
+}
+
 @theme {
   --color-tazo-bg:      #080c18;
   --color-tazo-surface: #0d1220;
@@ -104,8 +119,8 @@
   html { scroll-behavior: smooth; }
 
   body {
-    background-color: #080c18;
-    color: #e2e8f0;
+    background-color: var(--color-tazo-bg);
+    color: var(--color-tazo-text);
     font-family: 'Syne', sans-serif;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
@@ -146,6 +161,10 @@
     pointer-events: none;
     z-index: 0;
   }
+  [data-theme="light"] .ambient-top {
+    background: radial-gradient(ellipse, rgba(124,58,237,0.05) 0%, transparent 70%);
+  }
+  [data-theme="light"] body::before { opacity: 0.12; }
 
   /* ── Glass card ─────────────────────────────────────────────── */
   .glass {
@@ -153,6 +172,10 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(30, 45, 69, 0.8);
+  }
+  [data-theme="light"] .glass {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(203, 213, 225, 0.9);
   }
 
   /* ── Shimmer text ───────────────────────────────────────────── */

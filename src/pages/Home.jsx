@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import MatchList from '../components/matches/MatchList'
@@ -23,6 +23,16 @@ export default function Home() {
 
   const live  = matches.filter((m) => parseInt(m.status) === 1).length
   const total = matches.length
+
+  const liveByLeague = useMemo(() => {
+    const map = {}
+    matches
+      .filter((m) => parseInt(m.status) === 1)
+      .forEach((m) => {
+        if (m.league_en) map[m.league_en] = (map[m.league_en] || 0) + 1
+      })
+    return map
+  }, [matches])
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -108,7 +118,12 @@ export default function Home() {
             <DateSlider activeDate={date} onChange={setDate} />
             <SearchBar query={query} onChange={setQuery} />
             {!loading && leagues.length > 1 && (
-              <LeagueFilter leagues={leagues} active={league} onChange={setLeague} />
+              <LeagueFilter
+                leagues={leagues}
+                active={league}
+                onChange={setLeague}
+                liveByLeague={liveByLeague}
+              />
             )}
           </div>
 

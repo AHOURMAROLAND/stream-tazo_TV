@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import useAppStore from '../../store/useAppStore'
+import { IconSun, IconMoon } from '../ui/Icons'
 
 const TIMEZONES = [
   { label: 'GMT',    offset: 0 },
@@ -11,7 +12,7 @@ const TIMEZONES = [
 ]
 
 export default function Header() {
-  const { timezone, setTimezone } = useAppStore()
+  const { timezone, setTimezone, theme, setTheme } = useAppStore()
 
   return (
     <header className="sticky top-0 z-50">
@@ -50,6 +51,15 @@ export default function Header() {
             <span className="w-1.5 h-1.5 rounded-full bg-tazo-red animate-pulse-live live-glow" />
             <span className="text-tazo-red text-[10px] font-mono font-medium tracking-wider uppercase">Live</span>
           </div>
+
+          {/* Theme toggle */}
+          <button
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
+            className="w-10 h-10 rounded-xl bg-tazo-card border border-tazo-border hover:border-tazo-accent/50 flex items-center justify-center text-tazo-muted2 hover:text-tazo-accent transition-all"
+          >
+            {theme === 'dark' ? <IconSun className="w-4 h-4" /> : <IconMoon className="w-4 h-4" />}
+          </button>
 
           {/* Timezone selector */}
           <div className="relative">

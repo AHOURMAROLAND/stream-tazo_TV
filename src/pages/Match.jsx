@@ -26,6 +26,8 @@ import useFavorites from '../hooks/useFavorites'
 import useTeamFavorites from '../hooks/useTeamFavorites'
 import useAppStore from '../store/useAppStore'
 
+import { getStreamUrl, proxyM3u8 } from '../api/streamApi'
+
 export default function Match() {
   const { id }   = useParams()
   const navigate = useNavigate()
@@ -115,13 +117,30 @@ export default function Match() {
     }
   }, [match])
 
-  const handleSelectServer = (channel) => {
-    const url = channel.mobile_link || channel.link || null
-    streamRef.current = url        // keep latest url for mini-player cleanup
+  const handleSelectServer = async (channel) => {
     setActiveChannel(channel)
-    setStreamUrl(url)
-    setSwitchMsg(null)
+    setStreamUrl(null)
     setIframeReady(false)
+    setSwitchMsg('Connexion...')
+
+    // Tenter d'obtenir le m3u8 via meshify
+    const m3u8 = await getStreamUrl(channel)
+
+    if (m3u8) {
+      // Passer par le proxy Vercel → IP européenne
+      const proxied = proxyM3u8(m3u8)
+      console.log('[TAZO] Proxied URL:', proxied)
+      streamRef.current = proxied
+      setStreamUrl(proxied)
+      setSwitchMsg(null)
+    } else {
+      // Fallback sur le link direct
+      const fallback = channel.mobile_link || channel.link || null
+      console.log('[TAZO] Fallback:', fallback)
+      streamRef.current = fallback
+      setStreamUrl(fallback)
+      setSwitchMsg(null)
+    }
   }
 
   const handleStreamError = () => {

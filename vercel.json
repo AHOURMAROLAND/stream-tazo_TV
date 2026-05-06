@@ -7,5 +7,16 @@
     { "source": "/",          "destination": "/api/home"          },
     { "source": "/_spa",      "destination": "/index.html"        },
     { "source": "/(.*)",      "destination": "/index.html"        }
-  ]
+  ],
+  "functions": {
+    "api/proxy.js": {
+      "maxDuration": 30
+    },
+    "api/match.js": {
+      "maxDuration": 10
+    },
+    "api/home.js": {
+      "maxDuration": 10
+    }
+  }
 }

@@ -23,7 +23,7 @@ export default function VideoPlayer({ src, onStreamError, onReady }) {
   const [isOffline,    setIsOffline]    = useState(!navigator.onLine)
   const [isFullscreen, setIsFullscreen] = useState(false)
 
-  const isM3u8   = src && src.includes('.m3u8')
+  const isM3u8   = src && (src.includes('.m3u8') || src.includes('m3u8'))
   const isIframe = src && !isM3u8
 
   useEffect(() => { if (src) preconnect(src) }, [src])

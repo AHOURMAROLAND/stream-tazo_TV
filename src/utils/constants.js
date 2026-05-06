@@ -3,6 +3,8 @@ export const MESHIFY_BASE = 'https://us.meshify.cloud'
 export const CDN_LOGOS    = 'https://cdn.kora-api.space/uploads/team'
 export const CDN_LEAGUES  = 'https://cdn.kora-api.space/uploads/league'
 
+// v2 — direct API calls, no proxy needed
+
 export const MATCH_STATUS = {
   NOT_STARTED: 0,
   LIVE:        1,

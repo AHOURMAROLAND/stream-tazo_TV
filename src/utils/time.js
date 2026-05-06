@@ -21,3 +21,22 @@ export const formatTime = (time, offsetHours = 0) => {
   let newH = (h + offsetHours + 24) % 24
   return `${String(newH).padStart(2, '0')}:${String(m).padStart(2, '0')}`
 }
+
+export const getDateRange = () => {
+  const dates = []
+  for (let i = -14; i <= 14; i++) {
+    const d = dayjs().add(i, 'day')
+    dates.push({
+      date:     d.format('YYYY-MM-DD'),
+      label:    i === -1 ? 'Hier'
+              : i === 0  ? "Aujourd'hui"
+              : i === 1  ? 'Demain'
+              : d.format('DD/MM'),
+      day:      d.format('ddd'),
+      isToday:  i === 0,
+      isPast:   i < 0,
+      isFuture: i > 0,
+    })
+  }
+  return dates
+}

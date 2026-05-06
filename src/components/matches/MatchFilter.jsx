@@ -8,7 +8,7 @@ const TABS = [
 
 export default function MatchFilter({ activeDate, onChange }) {
   return (
-    <div className="flex gap-2 mb-8 p-1 bg-tazo-surface/60 rounded-2xl border border-tazo-border/50 w-fit">
+    <div className="flex gap-1 sm:gap-2 mb-8 p-1 bg-tazo-surface/60 rounded-2xl border border-tazo-border/50 w-full sm:w-fit">
       {TABS.map((tab) => {
         const isActive = activeDate === tab.date
         return (
@@ -16,7 +16,8 @@ export default function MatchFilter({ activeDate, onChange }) {
             key={tab.date}
             onClick={() => onChange(tab.date)}
             className={`
-              relative px-5 py-2.5 rounded-xl text-sm font-mono font-medium
+              relative flex-1 sm:flex-none px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl
+              text-xs sm:text-sm font-mono font-medium
               transition-all duration-250 overflow-hidden
               ${isActive
                 ? 'text-tazo-bg'
@@ -30,8 +31,10 @@ export default function MatchFilter({ activeDate, onChange }) {
                 <span className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent rounded-xl" />
               </>
             )}
-            <span className="relative flex items-center gap-2">
-              <span className={`text-[10px] ${isActive ? 'opacity-80' : 'opacity-40'}`}>{tab.emoji}</span>
+            <span className="relative flex items-center justify-center gap-1.5 sm:gap-2">
+              <span className={`text-[9px] sm:text-[10px] ${isActive ? 'opacity-80' : 'opacity-40'}`}>
+                {tab.emoji}
+              </span>
               {tab.label}
             </span>
           </button>

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import MatchList from '../components/matches/MatchList'
-import MatchFilter from '../components/matches/MatchFilter'
+import DateSlider from '../components/matches/DateSlider'
 import FavoritesList from '../components/matches/FavoritesList'
 import SearchBar from '../components/matches/SearchBar'
 import LeagueFilter from '../components/matches/LeagueFilter'
@@ -32,11 +32,11 @@ export default function Home() {
       <main className="relative flex-1 z-10">
         {/* Hero */}
         <div className="relative overflow-hidden border-b border-tazo-border/30">
-          <div className="absolute inset-0 opacity-[0.03]" style={{
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{
             backgroundImage: 'linear-gradient(rgba(0,212,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,1) 1px, transparent 1px)',
             backgroundSize: '60px 60px'
           }} />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-tazo-bg" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-tazo-bg pointer-events-none" />
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 pb-8">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -45,7 +45,7 @@ export default function Home() {
                   <div className="h-px w-8 bg-tazo-accent/60" />
                   <span className="text-tazo-accent text-[10px] font-mono tracking-[0.3em] uppercase">Football Live</span>
                 </div>
-                <h1 className="font-display text-5xl sm:text-6xl text-tazo-text tracking-[0.08em] leading-none">
+                <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl text-tazo-text tracking-[0.08em] leading-none">
                   MATCHS DU <span className="shimmer-text">JOUR</span>
                 </h1>
                 {!loading && total > 0 && (
@@ -102,7 +102,7 @@ export default function Home() {
           <FavoritesList />
 
           <div className="flex flex-col gap-3 mb-8">
-            <MatchFilter activeDate={date} onChange={setDate} />
+            <DateSlider activeDate={date} onChange={setDate} />
             <SearchBar query={query} onChange={setQuery} />
             {!loading && leagues.length > 1 && (
               <LeagueFilter leagues={leagues} active={league} onChange={setLeague} />

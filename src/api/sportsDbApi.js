@@ -21,3 +21,15 @@ export const fetchPlayerRatings = async (eventId) => {
   const res = await axios.get(`${BASE}/lookuplineup.php?id=${eventId}`)
   return res.data?.lineup || []
 }
+
+export const fetchTeamStats = async (teamName) => {
+  const search = await axios.get(`${BASE}/searchteams.php?t=${encodeURIComponent(teamName)}`)
+  const team   = search.data?.teams?.[0]
+  if (!team) return null
+
+  const events = await axios.get(`${BASE}/eventslast.php?id=${team.idTeam}`)
+  return {
+    team,
+    lastResults: events.data?.results || [],
+  }
+}

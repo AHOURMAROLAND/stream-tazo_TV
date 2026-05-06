@@ -1,5 +1,6 @@
 import MatchCard from './MatchCard'
 import { MatchCardSkeleton } from '../ui/Skeleton'
+import { IconCalendar, IconSignal } from '../ui/Icons'
 
 function SectionLabel({ label, count, accent = false }) {
   return (
@@ -35,7 +36,7 @@ export default function MatchList({ matches, loading, error, compact = false }) 
     return (
       <div className="flex flex-col items-center justify-center h-48 gap-3">
         <div className="w-12 h-12 rounded-2xl bg-tazo-red/10 border border-tazo-red/20 flex items-center justify-center">
-          <span className="text-tazo-red text-xl">!</span>
+          <span className="text-tazo-red font-bold text-lg">!</span>
         </div>
         <p className="text-tazo-red font-mono text-sm">Erreur : {error}</p>
       </div>
@@ -46,7 +47,7 @@ export default function MatchList({ matches, loading, error, compact = false }) 
     return (
       <div className="flex flex-col items-center justify-center h-48 gap-3">
         <div className="w-12 h-12 rounded-2xl bg-tazo-surface border border-tazo-border flex items-center justify-center">
-          <span className="text-2xl">📅</span>
+          <IconCalendar className="w-5 h-5 text-tazo-muted2" />
         </div>
         <p className="text-tazo-muted2 font-mono text-sm">Aucun match trouvé</p>
       </div>

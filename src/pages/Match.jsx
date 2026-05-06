@@ -8,14 +8,18 @@ import MatchBadge from '../components/matches/MatchBadge'
 import MatchInfo from '../components/matches/MatchInfo'
 import Commentary from '../components/matches/Commentary'
 import MatchStats from '../components/matches/MatchStats'
+import TeamStatsPanel from '../components/matches/TeamStatsPanel'
 import FavoriteButton from '../components/ui/FavoriteButton'
+import { IconSignal, IconStar } from '../components/ui/Icons'
 import useMatch from '../hooks/useMatch'
+import { MatchPageSkeleton } from '../components/ui/Skeleton'
 import useAutoSwitch from '../hooks/useAutoSwitch'
 import useDocumentTitle from '../hooks/useDocumentTitle'
 import useKeyboardShortcuts from '../hooks/useKeyboardShortcuts'
 import useCommentary from '../hooks/useCommentary'
 import useMatchStats from '../hooks/useMatchStats'
 import useFavorites from '../hooks/useFavorites'
+import useTeamFavorites from '../hooks/useTeamFavorites'
 
 export default function Match() {
   const { id }   = useParams()
@@ -25,8 +29,11 @@ export default function Match() {
   const [activeChannel, setActiveChannel] = useState(null)
   const [streamUrl, setStreamUrl]         = useState(null)
   const [switchMsg, setSwitchMsg]         = useState(null)
+  const [iframeReady, setIframeReady]     = useState(false)
+  const [selectedTeam, setSelectedTeam]   = useState(null)
 
   const { isFavorite, toggleFavorite } = useFavorites()
+  const { isTeamFav, toggleTeam }      = useTeamFavorites()
 
   const isLive     = match ? parseInt(match.status) === 1 : false
   const isFinished = match ? parseInt(match.status) === 2 : false
@@ -71,6 +78,7 @@ export default function Match() {
     setActiveChannel(channel)
     setStreamUrl(channel.mobile_link || channel.link || null)
     setSwitchMsg(null)
+    setIframeReady(false) // reset ready on server change
   }
 
   const handleStreamError = () => {
@@ -83,7 +91,7 @@ export default function Match() {
     handleSelectServer(nextChannel)
   }
 
-  useAutoSwitch(streamUrl, match?.channels, activeChannel, handleAutoSwitch)
+  useAutoSwitch(streamUrl, match?.channels, activeChannel, handleAutoSwitch, iframeReady)
   useKeyboardShortcuts(match?.channels, activeChannel, handleSelectServer)
 
   // ── Loading ────────────────────────────────────────────────────
@@ -92,15 +100,8 @@ export default function Match() {
       <div className="min-h-screen flex flex-col bg-tazo-bg">
         <div className="ambient-top" />
         <Header />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="flex flex-col items-center gap-4">
-            <div className="relative w-14 h-14">
-              <div className="absolute inset-0 rounded-full border-2 border-tazo-border" />
-              <div className="absolute inset-0 rounded-full border-2 border-tazo-accent border-t-transparent animate-spin" />
-            </div>
-            <span className="text-tazo-muted2 text-xs font-mono tracking-widest uppercase">Chargement...</span>
-          </div>
-        </div>
+        <MatchPageSkeleton />
+        <Footer />
       </div>
     )
   }
@@ -189,16 +190,22 @@ export default function Match() {
 
             {/* Teams + score */}
             <div className="flex items-center justify-between gap-4 sm:gap-8">
-              <TeamBlock name={match.home_en} logo={match.home_logo} />
+              <TeamBlock
+                name={match.home_en}
+                logo={match.home_logo}
+                isFav={isTeamFav(match.home_en)}
+                onFav={(e) => { e.stopPropagation(); toggleTeam({ name: match.home_en, logo: match.home_logo }) }}
+                onClick={() => setSelectedTeam({ name: match.home_en, logo: match.home_logo })}
+              />
 
               <div className="flex flex-col items-center gap-2 flex-shrink-0">
                 {isLive || isFinished ? (
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    <span className="font-display text-5xl sm:text-7xl text-tazo-text leading-none tracking-wider">
+                  <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
+                    <span className="font-display text-4xl sm:text-5xl lg:text-7xl text-tazo-text leading-none tracking-wider">
                       {scores[0]}
                     </span>
                     <div className="flex flex-col items-center gap-1">
-                      <span className="text-tazo-muted font-mono text-lg">:</span>
+                      <span className="text-tazo-muted font-mono text-base sm:text-lg">:</span>
                       {isLive && (
                         <span className="text-[9px] font-mono text-tazo-red tracking-widest uppercase animate-pulse">Live</span>
                       )}
@@ -206,13 +213,13 @@ export default function Match() {
                         <span className="text-[9px] font-mono text-tazo-muted tracking-widest uppercase">FT</span>
                       )}
                     </div>
-                    <span className="font-display text-5xl sm:text-7xl text-tazo-text leading-none tracking-wider">
+                    <span className="font-display text-4xl sm:text-5xl lg:text-7xl text-tazo-text leading-none tracking-wider">
                       {scores[1]}
                     </span>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center gap-1">
-                    <span className="font-mono text-3xl sm:text-4xl text-tazo-accent font-medium tracking-wider">
+                    <span className="font-mono text-2xl sm:text-3xl lg:text-4xl text-tazo-accent font-medium tracking-wider">
                       {match.time}
                     </span>
                     <span className="text-[10px] font-mono text-tazo-muted tracking-widest uppercase">Kick-off</span>
@@ -221,13 +228,19 @@ export default function Match() {
                 <span className="text-tazo-muted text-xs font-mono">{match.date}</span>
               </div>
 
-              <TeamBlock name={match.away_en} logo={match.away_logo} />
+              <TeamBlock
+                name={match.away_en}
+                logo={match.away_logo}
+                isFav={isTeamFav(match.away_en)}
+                onFav={(e) => { e.stopPropagation(); toggleTeam({ name: match.away_en, logo: match.away_logo }) }}
+                onClick={() => setSelectedTeam({ name: match.away_en, logo: match.away_logo })}
+              />
             </div>
           </div>
         </div>
 
-        {/* Player section */}
-        {match.channels && match.channels.length > 0 ? (
+        {/* Player section — always visible regardless of match status */}
+        {match.channels && match.channels.length > 0 && (
           <div className="relative overflow-hidden rounded-3xl">
             <div className="absolute inset-0 bg-tazo-card" />
             <div className="absolute inset-0 rounded-3xl border border-tazo-border/60" />
@@ -256,13 +269,22 @@ export default function Match() {
               />
 
               <div className="mt-6">
-                <VideoPlayer src={streamUrl} onStreamError={handleStreamError} />
+                <VideoPlayer
+                  src={streamUrl}
+                  onStreamError={handleStreamError}
+                  onReady={setIframeReady}
+                />
               </div>
             </div>
           </div>
-        ) : (
+        )}
+
+        {/* No stream available */}
+        {(!match.channels || match.channels.length === 0) && (
           <div className="rounded-3xl border border-tazo-border/40 border-dashed p-12 flex flex-col items-center gap-3">
-            <span className="text-3xl">📡</span>
+            <div className="w-12 h-12 rounded-2xl bg-tazo-surface border border-tazo-border flex items-center justify-center">
+              <IconSignal className="w-5 h-5 text-tazo-muted2" />
+            </div>
             <p className="text-tazo-muted2 font-mono text-sm">Aucun stream disponible</p>
           </div>
         )}
@@ -272,9 +294,9 @@ export default function Match() {
           <Commentary events={events} loading={commLoading} />
         )}
 
-        {/* Stats + player ratings — finished only */}
+        {/* Stats — always shown for finished matches */}
         {isFinished && (
-          <MatchStats stats={stats} ratings={ratings} loading={statsLoading} />
+          <MatchStats match={match} stats={stats} ratings={ratings} loading={statsLoading} />
         )}
 
         {/* Match info */}
@@ -282,16 +304,28 @@ export default function Match() {
 
       </main>
       <Footer />
+
+      {/* Team stats modal */}
+      {selectedTeam && (
+        <TeamStatsPanel
+          teamName={selectedTeam.name}
+          teamLogo={selectedTeam.logo}
+          onClose={() => setSelectedTeam(null)}
+        />
+      )}
     </div>
   )
 }
 
-function TeamBlock({ name, logo }) {
+function TeamBlock({ name, logo, onClick, isFav, onFav }) {
   return (
-    <div className="flex flex-col items-center gap-3 flex-1 min-w-0">
+    <div
+      onClick={onClick}
+      className="flex flex-col items-center gap-3 flex-1 min-w-0 cursor-pointer group"
+    >
       <div className="relative">
-        <div className="absolute inset-0 rounded-2xl bg-tazo-accent/5 blur-lg" />
-        <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-tazo-surface border border-tazo-border/60 flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 rounded-2xl bg-tazo-accent/5 blur-lg group-hover:bg-tazo-accent/15 transition-all" />
+        <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-tazo-surface border border-tazo-border/60 group-hover:border-tazo-accent/50 flex items-center justify-center overflow-hidden transition-colors">
           <img
             src={`https://cdn.kora-api.space/uploads/team/${logo}`}
             alt={name}
@@ -299,10 +333,31 @@ function TeamBlock({ name, logo }) {
             onError={(e) => { e.target.style.display = 'none' }}
           />
         </div>
+        {/* Favorite team button */}
+        <button
+          onClick={onFav}
+          className={`
+            absolute -top-2 -right-2 w-6 h-6 rounded-full border
+            flex items-center justify-center transition-all duration-200
+            ${isFav
+              ? 'bg-tazo-orange border-tazo-orange text-tazo-bg shadow-lg shadow-tazo-orange/30'
+              : 'bg-tazo-card border-tazo-border text-tazo-muted hover:border-tazo-orange hover:text-tazo-orange'
+            }
+          `}
+          title={isFav ? 'Retirer des équipes favorites' : 'Ajouter aux équipes favorites'}
+        >
+          <IconStar className="w-3 h-3" filled={isFav} />
+        </button>
       </div>
-      <span className="font-body font-semibold text-tazo-text text-center text-sm sm:text-base leading-tight max-w-[120px]">
-        {name}
-      </span>
+
+      <div className="flex flex-col items-center gap-0.5">
+        <span className="font-body font-semibold text-tazo-text text-center text-xs sm:text-sm lg:text-base leading-tight max-w-[90px] sm:max-w-[130px] group-hover:text-tazo-accent transition-colors">
+          {name}
+        </span>
+        <span className="text-[9px] font-mono text-tazo-muted tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
+          Voir stats
+        </span>
+      </div>
     </div>
   )
 }

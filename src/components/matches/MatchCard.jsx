@@ -3,12 +3,15 @@ import { formatTime } from '../../utils/time'
 import MatchBadge from './MatchBadge'
 import FavoriteButton from '../ui/FavoriteButton'
 import useFavorites from '../../hooks/useFavorites'
+import useTeamFavorites from '../../hooks/useTeamFavorites'
 import useAppStore from '../../store/useAppStore'
+import { IconStar } from '../ui/Icons'
 
 export default function MatchCard({ match, compact = false }) {
   const navigate = useNavigate()
   const timezone = useAppStore((s) => s.timezone)
   const { isFavorite, toggleFavorite } = useFavorites()
+  const { isTeamFav, toggleTeam } = useTeamFavorites()
 
   const {
     id, status, has_channels,
@@ -139,13 +142,26 @@ export default function MatchCard({ match, compact = false }) {
         <div className="flex items-center gap-3">
           {/* Home */}
           <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
-            <div className="w-12 h-12 rounded-2xl bg-tazo-surface border border-tazo-border/60 flex items-center justify-center overflow-hidden">
-              <img
-                src={`https://cdn.kora-api.space/uploads/team/${home_logo}`}
-                alt={home_en}
-                className="w-10 h-10 object-contain"
-                onError={(e) => { e.target.style.display = 'none' }}
-              />
+            <div className="relative">
+              <div className="w-12 h-12 rounded-2xl bg-tazo-surface border border-tazo-border/60 flex items-center justify-center overflow-hidden">
+                <img
+                  src={`https://cdn.kora-api.space/uploads/team/${home_logo}`}
+                  alt={home_en}
+                  className="w-10 h-10 object-contain"
+                  onError={(e) => { e.target.style.display = 'none' }}
+                />
+              </div>
+              <button
+                onClick={(e) => { e.stopPropagation(); toggleTeam({ name: home_en, logo: home_logo }) }}
+                className={`absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full border flex items-center justify-center transition-all duration-200
+                  ${isTeamFav(home_en)
+                    ? 'bg-tazo-orange border-tazo-orange text-tazo-bg'
+                    : 'bg-tazo-card border-tazo-border text-tazo-muted hover:border-tazo-orange hover:text-tazo-orange'
+                  }`}
+                title={isTeamFav(home_en) ? 'Retirer des favoris équipe' : 'Ajouter équipe aux favoris'}
+              >
+                <IconStar className="w-2.5 h-2.5" filled={isTeamFav(home_en)} />
+              </button>
             </div>
             <span className="text-[11px] text-tazo-text text-center font-medium leading-tight w-full truncate px-1">
               {home_en}
@@ -185,13 +201,26 @@ export default function MatchCard({ match, compact = false }) {
 
           {/* Away */}
           <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
-            <div className="w-12 h-12 rounded-2xl bg-tazo-surface border border-tazo-border/60 flex items-center justify-center overflow-hidden">
-              <img
-                src={`https://cdn.kora-api.space/uploads/team/${away_logo}`}
-                alt={away_en}
-                className="w-10 h-10 object-contain"
-                onError={(e) => { e.target.style.display = 'none' }}
-              />
+            <div className="relative">
+              <div className="w-12 h-12 rounded-2xl bg-tazo-surface border border-tazo-border/60 flex items-center justify-center overflow-hidden">
+                <img
+                  src={`https://cdn.kora-api.space/uploads/team/${away_logo}`}
+                  alt={away_en}
+                  className="w-10 h-10 object-contain"
+                  onError={(e) => { e.target.style.display = 'none' }}
+                />
+              </div>
+              <button
+                onClick={(e) => { e.stopPropagation(); toggleTeam({ name: away_en, logo: away_logo }) }}
+                className={`absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full border flex items-center justify-center transition-all duration-200
+                  ${isTeamFav(away_en)
+                    ? 'bg-tazo-orange border-tazo-orange text-tazo-bg'
+                    : 'bg-tazo-card border-tazo-border text-tazo-muted hover:border-tazo-orange hover:text-tazo-orange'
+                  }`}
+                title={isTeamFav(away_en) ? 'Retirer des favoris équipe' : 'Ajouter équipe aux favoris'}
+              >
+                <IconStar className="w-2.5 h-2.5" filled={isTeamFav(away_en)} />
+              </button>
             </div>
             <span className="text-[11px] text-tazo-text text-center font-medium leading-tight w-full truncate px-1">
               {away_en}

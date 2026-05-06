@@ -3,17 +3,20 @@
 
 /* ─── Light mode token overrides ────────────────────────────────────────── */
 [data-theme="light"] {
-  --color-tazo-bg:      #f8fafc;
-  --color-tazo-surface: #f1f5f9;
+  --color-tazo-bg:      #f0f4f8;
+  --color-tazo-surface: #e8edf3;
   --color-tazo-card:    #ffffff;
   --color-tazo-card2:   #f8fafc;
   --color-tazo-border:  #cbd5e1;
   --color-tazo-border2: #94a3b8;
   --color-tazo-accent:  #7c3aed;
   --color-tazo-accent2: #6d28d9;
+  --color-tazo-red:     #dc2626;
+  --color-tazo-green:   #16a34a;
+  --color-tazo-orange:  #ea580c;
   --color-tazo-text:    #0f172a;
-  --color-tazo-muted:   #94a3b8;
-  --color-tazo-muted2:  #64748b;
+  --color-tazo-muted:   #64748b;
+  --color-tazo-muted2:  #475569;
 }
 
 @theme {
@@ -122,8 +125,11 @@
     background-color: var(--color-tazo-bg);
     color: var(--color-tazo-text);
     font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   /* Noise texture overlay */

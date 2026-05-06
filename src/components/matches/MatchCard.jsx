@@ -17,7 +17,7 @@ export default function MatchCard({ match, compact = false }) {
     id, status, has_channels,
     home_en, away_en,
     home_logo, away_logo,
-    league_en, score, time,
+    league_en, league_logo, score, time,
   } = match
 
   const isLive     = parseInt(status) === 1
@@ -125,8 +125,19 @@ export default function MatchCard({ match, compact = false }) {
         {/* Header row */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2 min-w-0">
-            <div className="w-1 h-3 rounded-full bg-tazo-accent/40 flex-shrink-0" />
-            <span className="text-tazo-muted2 text-[11px] font-mono truncate">
+            {league_logo ? (
+              <div className="w-9 h-9 rounded-xl bg-tazo-surface border border-tazo-border/60 flex items-center justify-center overflow-hidden flex-shrink-0">
+                <img
+                  src={`https://cdn.kora-api.space/uploads/league/${league_logo}`}
+                  alt={league_en}
+                  className="w-7 h-7 object-contain"
+                  onError={(e) => { e.target.parentElement.style.display = 'none' }}
+                />
+              </div>
+            ) : (
+              <div className="w-1 h-3 rounded-full bg-tazo-accent/40 flex-shrink-0" />
+            )}
+            <span className="text-tazo-muted2 text-xs font-medium truncate">
               {league_en}
             </span>
           </div>
@@ -144,11 +155,11 @@ export default function MatchCard({ match, compact = false }) {
           {/* Home */}
           <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
             <div className="relative">
-            <div className="w-12 h-12 rounded-2xl bg-tazo-surface border border-tazo-border/60 flex items-center justify-center overflow-hidden group-hover:border-tazo-accent/30 transition-colors duration-300">
+              <div className="w-14 h-14 rounded-2xl bg-tazo-surface border border-tazo-border/60 flex items-center justify-center overflow-hidden transition-colors duration-300">
                 <img
                   src={`https://cdn.kora-api.space/uploads/team/${home_logo}`}
                   alt={home_en}
-                  className="w-10 h-10 object-contain img-hover"
+                  className="w-12 h-12 object-contain"
                   onError={(e) => { e.target.style.display = 'none' }}
                 />
               </div>
@@ -164,7 +175,7 @@ export default function MatchCard({ match, compact = false }) {
                 <IconStar className="w-2.5 h-2.5" filled={isTeamFav(home_en)} />
               </button>
             </div>
-            <span className="text-[11px] text-tazo-text text-center font-medium leading-tight w-full truncate px-1">
+            <span className="text-xs text-tazo-text text-center font-semibold leading-tight w-full truncate px-1">
               {home_en}
             </span>
           </div>
@@ -203,11 +214,11 @@ export default function MatchCard({ match, compact = false }) {
           {/* Away */}
           <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
             <div className="relative">
-            <div className="w-12 h-12 rounded-2xl bg-tazo-surface border border-tazo-border/60 flex items-center justify-center overflow-hidden group-hover:border-tazo-accent/30 transition-colors duration-300">
+              <div className="w-14 h-14 rounded-2xl bg-tazo-surface border border-tazo-border/60 flex items-center justify-center overflow-hidden transition-colors duration-300">
                 <img
                   src={`https://cdn.kora-api.space/uploads/team/${away_logo}`}
                   alt={away_en}
-                  className="w-10 h-10 object-contain img-hover"
+                  className="w-12 h-12 object-contain"
                   onError={(e) => { e.target.style.display = 'none' }}
                 />
               </div>
@@ -223,7 +234,7 @@ export default function MatchCard({ match, compact = false }) {
                 <IconStar className="w-2.5 h-2.5" filled={isTeamFav(away_en)} />
               </button>
             </div>
-            <span className="text-[11px] text-tazo-text text-center font-medium leading-tight w-full truncate px-1">
+            <span className="text-xs text-tazo-text text-center font-semibold leading-tight w-full truncate px-1">
               {away_en}
             </span>
           </div>

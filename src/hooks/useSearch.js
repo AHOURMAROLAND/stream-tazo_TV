@@ -5,8 +5,15 @@ export default function useSearch(matches) {
   const [league, setLeague] = useState('all')
 
   const leagues = useMemo(() => {
-    const all = matches.map((m) => m.league_en).filter(Boolean)
-    return ['all', ...new Set(all)]
+    const map = new Map()
+    matches.forEach((m) => {
+      if (m.league_en && !map.has(m.league_en)) {
+        map.set(m.league_en, m.league_logo || null)
+      }
+    })
+    const entries = [{ name: 'all', logo: null }]
+    map.forEach((logo, name) => entries.push({ name, logo }))
+    return entries
   }, [matches])
 
   const filtered = useMemo(() => {

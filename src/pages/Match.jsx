@@ -209,12 +209,12 @@ export default function Match() {
           <div className="relative p-6 sm:p-8">
             {/* League + badge + favorite */}
             <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-tazo-surface border border-tazo-border/60 flex items-center justify-center overflow-hidden">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-tazo-surface border border-tazo-border/60 flex items-center justify-center overflow-hidden shrink-0">
                   <img
                     src={`https://cdn.kora-api.space/uploads/league/${match.league_logo}`}
                     alt={match.league_en}
-                    className="w-6 h-6 object-contain"
+                    className="w-10 h-10 object-contain"
                     onError={(e) => { e.target.style.display = 'none' }}
                   />
                 </div>

@@ -9,15 +9,19 @@ import MatchInfo from '../components/matches/MatchInfo'
 import Commentary from '../components/matches/Commentary'
 import MatchStats from '../components/matches/MatchStats'
 import TeamStatsPanel from '../components/matches/TeamStatsPanel'
+import MatchCountdown from '../components/matches/MatchCountdown'
+import ShareButton from '../components/matches/ShareButton'
 import FavoriteButton from '../components/ui/FavoriteButton'
 import { IconSignal, IconStar } from '../components/ui/Icons'
 import useMatch from '../hooks/useMatch'
 import { MatchPageSkeleton } from '../components/ui/Skeleton'
 import useAutoSwitch from '../hooks/useAutoSwitch'
 import useDocumentTitle from '../hooks/useDocumentTitle'
+import useMatchMeta from '../hooks/useMatchMeta'
 import useKeyboardShortcuts from '../hooks/useKeyboardShortcuts'
 import useCommentary from '../hooks/useCommentary'
 import useMatchStats from '../hooks/useMatchStats'
+import useMatchExpiry from '../hooks/useMatchExpiry'
 import useFavorites from '../hooks/useFavorites'
 import useTeamFavorites from '../hooks/useTeamFavorites'
 import useAppStore from '../store/useAppStore'
@@ -73,6 +77,9 @@ export default function Match() {
   }, [])
 
   useDocumentTitle(match)
+  useMatchMeta(match)
+
+  const { isExpired, minutesLeft } = useMatchExpiry(match)
 
   const { events, loading: commLoading } = useCommentary(
     match?.api_matche_id,
@@ -222,6 +229,10 @@ export default function Match() {
               </div>
               <div className="flex items-center gap-2">
                 <MatchBadge status={match.status} />
+                {/* Share button — visible before and during match, hidden 30min after end */}
+                {!isExpired && (
+                  <ShareButton match={match} />
+                )}
                 <FavoriteButton
                   isFav={isFavorite(match.id)}
                   onClick={() => toggleFavorite(match)}
@@ -281,7 +292,42 @@ export default function Match() {
         </div>
 
         {/* Player section — always visible regardless of match status */}
-        {match.channels && match.channels.length > 0 && (
+        {/* Countdown — only for upcoming matches */}
+        {!isLive && !isFinished && (
+          <div className="mb-6">
+            <MatchCountdown match={match} />
+          </div>
+        )}
+
+        {/* Expired match notice */}
+        {isExpired && (
+          <div className="mb-6 relative overflow-hidden rounded-3xl">
+            <div className="absolute inset-0 bg-tazo-card" />
+            <div className="absolute inset-0 rounded-3xl border border-tazo-border/40" />
+            <div className="relative p-6 flex flex-col items-center gap-3 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-tazo-muted/10 border border-tazo-border flex items-center justify-center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-tazo-muted2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+              </div>
+              <div>
+                <p className="font-display text-lg text-tazo-muted2 tracking-wider">LIEN EXPIRÉ</p>
+                <p className="text-tazo-muted text-xs font-mono mt-1">
+                  Ce match s'est terminé il y a plus de 30 minutes. Les streams ne sont plus disponibles.
+                </p>
+              </div>
+              <button
+                onClick={() => navigate('/')}
+                className="mt-2 px-4 py-2 rounded-xl btn-accent text-tazo-bg text-sm font-mono font-bold"
+              >
+                Voir les matchs du jour
+              </button>
+            </div>
+          </div>
+        )}
+
+        {match.channels && match.channels.length > 0 && !isExpired && (
           <div className="rounded-3xl border border-tazo-border/60 bg-tazo-card">
             <div className="p-6 sm:p-8">
               <div className="flex items-center justify-between mb-5">
@@ -329,7 +375,7 @@ export default function Match() {
         )}
 
         {/* No stream / no channels */}
-        {(!match.channels || match.channels.length === 0) && (
+        {(!match.channels || match.channels.length === 0) && !isExpired && (
           <div className="relative overflow-hidden rounded-3xl">
             <div className="absolute inset-0 bg-tazo-card" />
             <div className="absolute inset-0 rounded-3xl border border-tazo-border/40" />

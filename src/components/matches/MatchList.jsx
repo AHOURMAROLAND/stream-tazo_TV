@@ -20,21 +20,13 @@ function SectionLabel({ label, count, accent = false }) {
   )
 }
 
-export default function MatchList({ matches, loading, error }) {
+export default function MatchList({ matches, loading, error, compact = false }) {
   if (loading) {
     return (
-      <div className="space-y-8">
-        <div>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-1 h-4 rounded-full bg-tazo-border2 animate-pulse" />
-            <div className="h-3 w-24 bg-tazo-card rounded animate-pulse" />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <MatchCardSkeleton key={i} />
-            ))}
-          </div>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <MatchCardSkeleton key={i} />
+        ))}
       </div>
     )
   }
@@ -56,7 +48,7 @@ export default function MatchList({ matches, loading, error }) {
         <div className="w-12 h-12 rounded-2xl bg-tazo-surface border border-tazo-border flex items-center justify-center">
           <span className="text-2xl">📅</span>
         </div>
-        <p className="text-tazo-muted2 font-mono text-sm">Aucun match disponible</p>
+        <p className="text-tazo-muted2 font-mono text-sm">Aucun match trouvé</p>
       </div>
     )
   }
@@ -64,6 +56,38 @@ export default function MatchList({ matches, loading, error }) {
   const live     = matches.filter((m) => parseInt(m.status) === 1)
   const upcoming = matches.filter((m) => parseInt(m.status) === 0)
   const finished = matches.filter((m) => parseInt(m.status) === 2)
+
+  if (compact) {
+    const ordered = [...live, ...upcoming, ...finished]
+    return (
+      <div className="space-y-10">
+        {live.length > 0 && (
+          <section>
+            <SectionLabel label="En direct" count={live.length} accent />
+            <div className="flex flex-col gap-2">
+              {live.map((m) => <MatchCard key={m.id} match={m} compact />)}
+            </div>
+          </section>
+        )}
+        {upcoming.length > 0 && (
+          <section>
+            <SectionLabel label="À venir" count={upcoming.length} />
+            <div className="flex flex-col gap-2">
+              {upcoming.map((m) => <MatchCard key={m.id} match={m} compact />)}
+            </div>
+          </section>
+        )}
+        {finished.length > 0 && (
+          <section>
+            <SectionLabel label="Terminés" count={finished.length} />
+            <div className="flex flex-col gap-2">
+              {finished.map((m) => <MatchCard key={m.id} match={m} compact />)}
+            </div>
+          </section>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-10">
@@ -75,7 +99,6 @@ export default function MatchList({ matches, loading, error }) {
           </div>
         </section>
       )}
-
       {upcoming.length > 0 && (
         <section>
           <SectionLabel label="À venir" count={upcoming.length} />
@@ -84,7 +107,6 @@ export default function MatchList({ matches, loading, error }) {
           </div>
         </section>
       )}
-
       {finished.length > 0 && (
         <section>
           <SectionLabel label="Terminés" count={finished.length} />

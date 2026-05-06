@@ -3,33 +3,34 @@ import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import MatchList from '../components/matches/MatchList'
 import MatchFilter from '../components/matches/MatchFilter'
+import FavoritesList from '../components/matches/FavoritesList'
+import SearchBar from '../components/matches/SearchBar'
+import LeagueFilter from '../components/matches/LeagueFilter'
 import useMatches from '../hooks/useMatches'
+import useSearch from '../hooks/useSearch'
 import { getToday } from '../utils/time'
 
 export default function Home() {
-  const [date, setDate] = useState(getToday())
+  const [date, setDate]       = useState(getToday())
+  const [compact, setCompact] = useState(false)
   const { matches, loading, error } = useMatches(date)
+  const { query, setQuery, league, setLeague, leagues, filtered } = useSearch(matches)
 
-  const live     = matches.filter((m) => parseInt(m.status) === 1).length
-  const total    = matches.length
+  const live  = matches.filter((m) => parseInt(m.status) === 1).length
+  const total = matches.length
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Ambient background */}
       <div className="ambient-top" />
-
       <Header />
 
       <main className="relative flex-1 z-10">
-        {/* Hero section */}
+        {/* Hero */}
         <div className="relative overflow-hidden border-b border-tazo-border/30">
-          {/* Background grid */}
-          <div className="absolute inset-0 opacity-[0.03]"
-            style={{
-              backgroundImage: 'linear-gradient(rgba(0,212,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,1) 1px, transparent 1px)',
-              backgroundSize: '60px 60px'
-            }}
-          />
+          <div className="absolute inset-0 opacity-[0.03]" style={{
+            backgroundImage: 'linear-gradient(rgba(0,212,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,1) 1px, transparent 1px)',
+            backgroundSize: '60px 60px'
+          }} />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-tazo-bg" />
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 pb-8">
@@ -37,47 +38,75 @@ export default function Home() {
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <div className="h-px w-8 bg-tazo-accent/60" />
-                  <span className="text-tazo-accent text-[10px] font-mono tracking-[0.3em] uppercase">
-                    Football Live
-                  </span>
+                  <span className="text-tazo-accent text-[10px] font-mono tracking-[0.3em] uppercase">Football Live</span>
                 </div>
                 <h1 className="font-display text-5xl sm:text-6xl text-tazo-text tracking-[0.08em] leading-none">
-                  MATCHS DU{' '}
-                  <span className="shimmer-text">JOUR</span>
+                  MATCHS DU <span className="shimmer-text">JOUR</span>
                 </h1>
                 {!loading && total > 0 && (
                   <p className="text-tazo-muted2 text-sm font-mono mt-2">
                     {total} match{total > 1 ? 's' : ''} programmés
-                    {live > 0 && (
-                      <span className="ml-2 text-tazo-red">
-                        · {live} en direct
-                      </span>
-                    )}
+                    {live > 0 && <span className="ml-2 text-tazo-red">· {live} en direct</span>}
                   </p>
                 )}
               </div>
 
-              {/* Live counter */}
-              {live > 0 && (
-                <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-tazo-red/10 border border-tazo-red/20 self-start sm:self-auto">
-                  <div className="relative">
-                    <div className="w-3 h-3 rounded-full bg-tazo-red animate-pulse-live" />
-                    <div className="absolute inset-0 rounded-full bg-tazo-red/40 animate-ping" />
+              <div className="flex items-center gap-3">
+                {/* Live counter */}
+                {live > 0 && (
+                  <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-tazo-red/10 border border-tazo-red/20">
+                    <div className="relative">
+                      <div className="w-3 h-3 rounded-full bg-tazo-red animate-pulse-live" />
+                      <div className="absolute inset-0 rounded-full bg-tazo-red/40 animate-ping" />
+                    </div>
+                    <div>
+                      <div className="font-display text-2xl text-tazo-red leading-none">{live}</div>
+                      <div className="text-[9px] font-mono text-tazo-red/70 tracking-widest uppercase">Live now</div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="font-display text-2xl text-tazo-red leading-none">{live}</div>
-                    <div className="text-[9px] font-mono text-tazo-red/70 tracking-widest uppercase">Live now</div>
-                  </div>
-                </div>
-              )}
+                )}
+
+                {/* View toggle */}
+                <button
+                  onClick={() => setCompact((v) => !v)}
+                  title={compact ? 'Vue grille' : 'Vue liste'}
+                  className="w-10 h-10 rounded-xl bg-tazo-card border border-tazo-border hover:border-tazo-accent/50 flex items-center justify-center text-tazo-muted2 hover:text-tazo-accent transition-all"
+                >
+                  {compact ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                      <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+                    </svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/>
+                      <line x1="3" y1="18" x2="21" y2="18"/>
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-          <MatchFilter activeDate={date} onChange={setDate} />
-          <MatchList matches={matches} loading={loading} error={error} />
+          <FavoritesList />
+
+          <div className="flex flex-col gap-3 mb-8">
+            <MatchFilter activeDate={date} onChange={setDate} />
+            <SearchBar query={query} onChange={setQuery} />
+            {!loading && leagues.length > 1 && (
+              <LeagueFilter leagues={leagues} active={league} onChange={setLeague} />
+            )}
+          </div>
+
+          <MatchList
+            matches={filtered}
+            loading={loading}
+            error={error}
+            compact={compact}
+          />
         </div>
       </main>
 

@@ -1,11 +1,14 @@
 import { useNavigate } from 'react-router-dom'
 import { formatTime } from '../../utils/time'
 import MatchBadge from './MatchBadge'
+import FavoriteButton from '../ui/FavoriteButton'
+import useFavorites from '../../hooks/useFavorites'
 import useAppStore from '../../store/useAppStore'
 
-export default function MatchCard({ match }) {
+export default function MatchCard({ match, compact = false }) {
   const navigate = useNavigate()
   const timezone = useAppStore((s) => s.timezone)
+  const { isFavorite, toggleFavorite } = useFavorites()
 
   const {
     id, status, has_channels,
@@ -23,6 +26,67 @@ export default function MatchCard({ match }) {
     ? score.split(' - ')
     : ['-', '-']
 
+  // ── Compact / list mode ────────────────────────────────────────
+  if (compact) {
+    return (
+      <div
+        onClick={() => hasStream && navigate(`/match/${id}`)}
+        className={`
+          flex items-center justify-between rounded-xl px-4 py-3
+          border transition-all duration-200
+          ${hasStream
+            ? 'bg-tazo-card border-tazo-border hover:border-tazo-accent/50 cursor-pointer hover:bg-tazo-card2'
+            : 'bg-tazo-card/50 border-tazo-border/40 opacity-60 cursor-default'
+          }
+          ${isLive ? 'border-tazo-red/25' : ''}
+        `}
+      >
+        {/* Home */}
+        <div className="flex items-center gap-2 w-[35%] min-w-0">
+          <div className="w-6 h-6 rounded-lg bg-tazo-surface border border-tazo-border/60 flex items-center justify-center overflow-hidden flex-shrink-0">
+            <img
+              src={`https://cdn.kora-api.space/uploads/team/${home_logo}`}
+              alt={home_en}
+              className="w-5 h-5 object-contain"
+              onError={(e) => { e.target.style.display = 'none' }}
+            />
+          </div>
+          <span className="text-xs font-medium text-tazo-text truncate">{home_en}</span>
+        </div>
+
+        {/* Center */}
+        <div className="flex flex-col items-center gap-0.5 min-w-[90px]">
+          {isLive || isFinished ? (
+            <span className="font-mono text-sm font-bold text-tazo-text tracking-wider">
+              {scores[0]} : {scores[1]}
+            </span>
+          ) : (
+            <span className="font-mono text-sm text-tazo-accent">{displayTime}</span>
+          )}
+          <MatchBadge status={status} />
+        </div>
+
+        {/* Away */}
+        <div className="flex items-center gap-2 w-[35%] min-w-0 justify-end">
+          <span className="text-xs font-medium text-tazo-text truncate">{away_en}</span>
+          <div className="w-6 h-6 rounded-lg bg-tazo-surface border border-tazo-border/60 flex items-center justify-center overflow-hidden flex-shrink-0">
+            <img
+              src={`https://cdn.kora-api.space/uploads/team/${away_logo}`}
+              alt={away_en}
+              className="w-5 h-5 object-contain"
+              onError={(e) => { e.target.style.display = 'none' }}
+            />
+          </div>
+          <FavoriteButton
+            isFav={isFavorite(id)}
+            onClick={() => toggleFavorite(match)}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  // ── Card / grid mode ───────────────────────────────────────────
   return (
     <div
       onClick={() => hasStream && navigate(`/match/${id}`)}
@@ -36,17 +100,12 @@ export default function MatchCard({ match }) {
       <div className="absolute inset-0 bg-tazo-card" />
       <div className="absolute inset-0 bg-gradient-to-br from-tazo-card2/50 to-transparent" />
 
-      {/* Live top glow bar */}
+      {/* Live top bar */}
       {isLive && (
         <>
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-tazo-red to-transparent" />
           <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-tazo-red/5 to-transparent" />
         </>
-      )}
-
-      {/* Hover accent glow */}
-      {hasStream && (
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-tazo-accent/3 to-transparent pointer-events-none" />
       )}
 
       {/* Border */}
@@ -58,9 +117,7 @@ export default function MatchCard({ match }) {
             : 'border-tazo-border/50'
       }`} />
 
-      {/* Content */}
       <div className="relative p-4">
-
         {/* Header row */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2 min-w-0">
@@ -69,28 +126,26 @@ export default function MatchCard({ match }) {
               {league_en}
             </span>
           </div>
-          <MatchBadge status={status} />
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <MatchBadge status={status} />
+            <FavoriteButton
+              isFav={isFavorite(id)}
+              onClick={() => toggleFavorite(match)}
+            />
+          </div>
         </div>
 
         {/* Teams row */}
         <div className="flex items-center gap-3">
-
-          {/* Home team */}
+          {/* Home */}
           <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
-            <div className="relative">
-              <div className="w-12 h-12 rounded-2xl bg-tazo-surface border border-tazo-border/60 flex items-center justify-center overflow-hidden">
-                <img
-                  src={`https://cdn.kora-api.space/uploads/team/${home_logo}`}
-                  alt={home_en}
-                  className="w-10 h-10 object-contain"
-                  onError={(e) => {
-                    e.target.replaceWith(Object.assign(document.createElement('div'), {
-                      className: 'w-10 h-10 flex items-center justify-center',
-                      innerHTML: `<span style="font-size:18px">⚽</span>`
-                    }))
-                  }}
-                />
-              </div>
+            <div className="w-12 h-12 rounded-2xl bg-tazo-surface border border-tazo-border/60 flex items-center justify-center overflow-hidden">
+              <img
+                src={`https://cdn.kora-api.space/uploads/team/${home_logo}`}
+                alt={home_en}
+                className="w-10 h-10 object-contain"
+                onError={(e) => { e.target.style.display = 'none' }}
+              />
             </div>
             <span className="text-[11px] text-tazo-text text-center font-medium leading-tight w-full truncate px-1">
               {home_en}
@@ -119,7 +174,6 @@ export default function MatchCard({ match }) {
                 </span>
               </div>
             )}
-
             {hasStream && (
               <span className={`text-[9px] font-mono tracking-wider uppercase mt-0.5 ${
                 isLive ? 'text-tazo-red' : 'text-tazo-muted2'
@@ -129,19 +183,14 @@ export default function MatchCard({ match }) {
             )}
           </div>
 
-          {/* Away team */}
+          {/* Away */}
           <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
             <div className="w-12 h-12 rounded-2xl bg-tazo-surface border border-tazo-border/60 flex items-center justify-center overflow-hidden">
               <img
                 src={`https://cdn.kora-api.space/uploads/team/${away_logo}`}
                 alt={away_en}
                 className="w-10 h-10 object-contain"
-                onError={(e) => {
-                  e.target.replaceWith(Object.assign(document.createElement('div'), {
-                    className: 'w-10 h-10 flex items-center justify-center',
-                    innerHTML: `<span style="font-size:18px">⚽</span>`
-                  }))
-                }}
+                onError={(e) => { e.target.style.display = 'none' }}
               />
             </div>
             <span className="text-[11px] text-tazo-text text-center font-medium leading-tight w-full truncate px-1">

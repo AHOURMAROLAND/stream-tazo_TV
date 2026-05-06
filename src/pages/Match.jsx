@@ -107,7 +107,8 @@ export default function Match() {
   }
 
   // ── Error ──────────────────────────────────────────────────────
-  if (error || !match) {
+  // Only show error if we have NO match data at all
+  if (error && !match) {
     return (
       <div className="min-h-screen flex flex-col bg-tazo-bg">
         <Header />
@@ -128,6 +129,9 @@ export default function Match() {
       </div>
     )
   }
+
+  // If no match data and no error — still loading
+  if (!match) return null
 
   const scores = match.score && match.score !== '-'
     ? match.score.split(' - ')
@@ -291,15 +295,36 @@ export default function Match() {
           </div>
         )}
 
-        {/* No stream available */}
+        {/* No stream / no channels */}
         {(!match.channels || match.channels.length === 0) && (
-          <div className="rounded-3xl border border-tazo-border/40 border-dashed p-10 flex flex-col items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-tazo-surface border border-tazo-border flex items-center justify-center">
-              <IconSignal className="w-5 h-5 text-tazo-muted2" />
+          <div className="relative overflow-hidden rounded-3xl">
+            <div className="absolute inset-0 bg-tazo-card" />
+            <div className="absolute inset-0 rounded-3xl border border-tazo-border/40" />
+            <div className="relative p-8 flex flex-col items-center gap-4 text-center">
+              {isFinished ? (
+                <>
+                  <div className="w-14 h-14 rounded-2xl bg-tazo-muted/10 border border-tazo-border flex items-center justify-center">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-tazo-muted2">
+                      <path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="font-display text-xl text-tazo-text tracking-wider mb-1">MATCH TERMINÉ</p>
+                    <p className="text-tazo-muted2 text-sm font-mono">
+                      Score final : <span className="text-tazo-accent font-bold">{match.score}</span>
+                    </p>
+                    <p className="text-tazo-muted text-xs font-mono mt-1">Aucun replay disponible</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="w-14 h-14 rounded-2xl bg-tazo-surface border border-tazo-border flex items-center justify-center">
+                    <IconSignal className="w-5 h-5 text-tazo-muted2" />
+                  </div>
+                  <p className="text-tazo-muted2 font-mono text-sm">Aucun stream disponible pour ce match</p>
+                </>
+              )}
             </div>
-            <p className="text-tazo-muted2 font-mono text-sm">
-              {isFinished ? 'Aucun replay disponible' : 'Aucun stream disponible'}
-            </p>
           </div>
         )}
 

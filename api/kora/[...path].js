@@ -1,11 +1,8 @@
 // Vercel Serverless Function — proxy vers kora-api.space
-// Capture tout : /api/kora/api/matches/2026-05-06/1?t=... → https://kora-api.space/api/matches/...
+// req.query.path = ['api', 'matches', '2026-05-06', '1']
+// req.url        = /api/kora/api/matches/2026-05-06/1?t=202605061200
 
 export default async function handler(req, res) {
-  // req.url = /api/kora/api/matches/... → on extrait après /api/kora
-  const afterKora = req.url.replace(/^\/api\/kora/, '') || '/'
-  const targetUrl = `https://kora-api.space${afterKora}`
-
   // CORS preflight
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin',  '*')
@@ -15,6 +12,19 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Build path from query segments + preserve query string
+    const segments   = Array.isArray(req.query.path) ? req.query.path : [req.query.path]
+    const pathStr    = segments.join('/')
+
+    // Extract query string from req.url (everything after ?)
+    const rawUrl     = req.url || ''
+    const qIndex     = rawUrl.indexOf('?')
+    const queryStr   = qIndex !== -1 ? rawUrl.slice(qIndex) : ''
+
+    const targetUrl  = `https://kora-api.space/${pathStr}${queryStr}`
+
+    console.log('[kora proxy] →', targetUrl)
+
     const upstream = await fetch(targetUrl, {
       method:  req.method,
       headers: {
@@ -39,7 +49,7 @@ export default async function handler(req, res) {
     }
 
   } catch (err) {
-    console.error('[kora proxy]', err.message)
+    console.error('[kora proxy] error:', err.message)
     res.status(502).json({ error: 'Upstream error', message: err.message })
   }
 }

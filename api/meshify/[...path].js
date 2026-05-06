@@ -1,9 +1,6 @@
 // Vercel Serverless Function — proxy vers us.meshify.cloud
 
 export default async function handler(req, res) {
-  const afterMeshify = req.url.replace(/^\/api\/meshify/, '') || '/'
-  const targetUrl    = `https://us.meshify.cloud${afterMeshify}`
-
   // CORS preflight
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin',  '*')
@@ -13,9 +10,19 @@ export default async function handler(req, res) {
   }
 
   try {
-    const bodyText = req.method !== 'GET' && req.method !== 'HEAD'
-      ? JSON.stringify(req.body)
-      : undefined
+    const segments  = Array.isArray(req.query.path) ? req.query.path : [req.query.path]
+    const pathStr   = segments.join('/')
+    const rawUrl    = req.url || ''
+    const qIndex    = rawUrl.indexOf('?')
+    const queryStr  = qIndex !== -1 ? rawUrl.slice(qIndex) : ''
+    const targetUrl = `https://us.meshify.cloud/${pathStr}${queryStr}`
+
+    console.log('[meshify proxy] →', targetUrl)
+
+    let bodyInit
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      bodyInit = typeof req.body === 'string' ? req.body : JSON.stringify(req.body)
+    }
 
     const upstream = await fetch(targetUrl, {
       method:  req.method,
@@ -25,7 +32,7 @@ export default async function handler(req, res) {
         'Referer':      'https://vip.kora-top.zip/',
         'User-Agent':   'Mozilla/5.0 (compatible; TazoTV/1.0)',
       },
-      body: bodyText,
+      body: bodyInit,
     })
 
     const contentType = upstream.headers.get('content-type') || ''
@@ -42,7 +49,7 @@ export default async function handler(req, res) {
     }
 
   } catch (err) {
-    console.error('[meshify proxy]', err.message)
+    console.error('[meshify proxy] error:', err.message)
     res.status(502).json({ error: 'Upstream error', message: err.message })
   }
 }

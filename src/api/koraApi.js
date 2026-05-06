@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { KORA_BASE } from '../utils/constants'
 import { getTimestamp, getToday } from '../utils/time'
-import { cacheGet, cacheSet } from '../utils/cache'
+import { cacheGet, cacheSet, cacheClear } from '../utils/cache'
 
 const api = axios.create({ baseURL: KORA_BASE })
 
@@ -9,10 +9,13 @@ const api = axios.create({ baseURL: KORA_BASE })
 const LIVE_TTL    = 30  * 1000
 const DEFAULT_TTL = 5   * 60 * 1000
 
-export const fetchMatches = async (date = getToday()) => {
+export const fetchMatches = async (date = getToday(), { forceRefresh = false } = {}) => {
   const cacheKey = `matches_${date}`
-  const cached   = cacheGet(cacheKey)
-  if (cached) return cached
+
+  if (!forceRefresh) {
+    const cached = cacheGet(cacheKey)
+    if (cached) return cached
+  }
 
   const t   = getTimestamp()
   const res = await api.get(`/api/matches/${date}/1?t=${t}`)

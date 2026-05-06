@@ -1,0 +1,32 @@
+{
+  "name": "TAZO TV — Football Live",
+  "short_name": "ptitazo",
+  "description": "Regardez les matchs de football en direct avec TAZO TV",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080c18",
+  "theme_color": "#00d4ff",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/ptitazologo.jpeg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/ptitazologo.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["sports", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "Matchs du jour",
+      "url": "/",
+      "description": "Voir les matchs en direct"
+    }
+  ]
+}

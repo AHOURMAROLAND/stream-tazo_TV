@@ -1,13 +1,40 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>stream-tazo-tv</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#00d4ff" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="TAZO TV" />
+
+    <!-- Icons -->
+    <link rel="icon" type="image/jpeg" href="/ptitazologo.jpeg" />
+    <link rel="apple-touch-icon" href="/ptitazologo.jpeg" />
+
+    <!-- SEO -->
+    <meta name="description" content="Regardez les matchs de football en direct — TAZO TV" />
+    <meta name="keywords" content="football, live, stream, matchs, direct" />
+    <meta property="og:title" content="TAZO TV — Football Live" />
+    <meta property="og:description" content="Regardez les matchs de football en direct" />
+    <meta property="og:type" content="website" />
+
+    <title>TAZO TV</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      // Register Service Worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {})
+        })
+      }
+    </script>
   </body>
 </html>

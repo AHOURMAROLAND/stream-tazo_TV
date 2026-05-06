@@ -97,6 +97,7 @@ export default function MatchCard({ match, compact = false }) {
         relative overflow-hidden rounded-2xl
         transition-all duration-300
         ${hasStream ? 'cursor-pointer card-hover' : 'opacity-50 cursor-default'}
+        ${isLive && hasStream ? 'card-live-border' : ''}
       `}
     >
       {/* Background layers */}
@@ -143,11 +144,11 @@ export default function MatchCard({ match, compact = false }) {
           {/* Home */}
           <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
             <div className="relative">
-              <div className="w-12 h-12 rounded-2xl bg-tazo-surface border border-tazo-border/60 flex items-center justify-center overflow-hidden">
+            <div className="w-12 h-12 rounded-2xl bg-tazo-surface border border-tazo-border/60 flex items-center justify-center overflow-hidden group-hover:border-tazo-accent/30 transition-colors duration-300">
                 <img
                   src={`https://cdn.kora-api.space/uploads/team/${home_logo}`}
                   alt={home_en}
-                  className="w-10 h-10 object-contain"
+                  className="w-10 h-10 object-contain img-hover"
                   onError={(e) => { e.target.style.display = 'none' }}
                 />
               </div>
@@ -202,11 +203,11 @@ export default function MatchCard({ match, compact = false }) {
           {/* Away */}
           <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
             <div className="relative">
-              <div className="w-12 h-12 rounded-2xl bg-tazo-surface border border-tazo-border/60 flex items-center justify-center overflow-hidden">
+            <div className="w-12 h-12 rounded-2xl bg-tazo-surface border border-tazo-border/60 flex items-center justify-center overflow-hidden group-hover:border-tazo-accent/30 transition-colors duration-300">
                 <img
                   src={`https://cdn.kora-api.space/uploads/team/${away_logo}`}
                   alt={away_en}
-                  className="w-10 h-10 object-contain"
+                  className="w-10 h-10 object-contain img-hover"
                   onError={(e) => { e.target.style.display = 'none' }}
                 />
               </div>

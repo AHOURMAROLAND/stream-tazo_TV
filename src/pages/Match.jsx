@@ -143,14 +143,15 @@ export default function Match() {
         {/* Back */}
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-tazo-muted2 hover:text-tazo-accent text-sm font-mono mb-8 transition-colors group"
+          className="motion-fade flex items-center gap-2 text-tazo-muted2 hover:text-tazo-accent text-sm font-mono mb-8 transition-colors group"
         >
           <span className="group-hover:-translate-x-1 transition-transform">←</span>
           Retour aux matchs
         </button>
 
         {/* Match hero card */}
-        <div className="relative overflow-hidden rounded-3xl mb-6">
+        <div className="motion-enter relative overflow-hidden rounded-3xl mb-6"
+             style={{ animationDelay: '0.06s' }}>
           <div className="absolute inset-0 bg-tazo-card" />
           <div className="absolute inset-0 bg-gradient-to-br from-tazo-card2 to-transparent" />
           {isLive && (
@@ -249,7 +250,9 @@ export default function Match() {
               <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-3">
                   <div className="w-1 h-5 rounded-full bg-tazo-accent/60" />
-                  <h2 className="font-display text-2xl text-tazo-text tracking-wider">SERVEURS</h2>
+                  <h2 className="font-display text-2xl text-tazo-text tracking-wider">
+                    {isFinished ? 'REPLAY / RÉSUMÉ' : 'SERVEURS'}
+                  </h2>
                   <span className="text-xs font-mono text-tazo-muted2 px-2 py-0.5 rounded-full border border-tazo-border bg-tazo-surface/50">
                     {match.channels.length}
                   </span>
@@ -261,6 +264,15 @@ export default function Match() {
                   </div>
                 )}
               </div>
+
+              {isFinished && (
+                <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-xl bg-tazo-muted/10 border border-tazo-border/40">
+                  <span className="w-1.5 h-1.5 rounded-full bg-tazo-muted2" />
+                  <span className="text-tazo-muted2 text-xs font-mono">
+                    Match terminé — les streams peuvent afficher un résumé ou être indisponibles
+                  </span>
+                </div>
+              )}
 
               <ServerList
                 channels={match.channels}
@@ -281,26 +293,34 @@ export default function Match() {
 
         {/* No stream available */}
         {(!match.channels || match.channels.length === 0) && (
-          <div className="rounded-3xl border border-tazo-border/40 border-dashed p-12 flex flex-col items-center gap-3">
+          <div className="rounded-3xl border border-tazo-border/40 border-dashed p-10 flex flex-col items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-tazo-surface border border-tazo-border flex items-center justify-center">
               <IconSignal className="w-5 h-5 text-tazo-muted2" />
             </div>
-            <p className="text-tazo-muted2 font-mono text-sm">Aucun stream disponible</p>
+            <p className="text-tazo-muted2 font-mono text-sm">
+              {isFinished ? 'Aucun replay disponible' : 'Aucun stream disponible'}
+            </p>
           </div>
         )}
 
         {/* Commentary — live or finished */}
         {(isLive || isFinished) && (
-          <Commentary events={events} loading={commLoading} />
+          <div className="motion-fade" style={{ animationDelay: '0.22s' }}>
+            <Commentary events={events} loading={commLoading} />
+          </div>
         )}
 
         {/* Stats — always shown for finished matches */}
         {isFinished && (
-          <MatchStats match={match} stats={stats} ratings={ratings} loading={statsLoading} />
+          <div className="motion-fade" style={{ animationDelay: '0.28s' }}>
+            <MatchStats match={match} stats={stats} ratings={ratings} loading={statsLoading} />
+          </div>
         )}
 
         {/* Match info */}
-        <MatchInfo match={match} />
+        <div className="motion-fade" style={{ animationDelay: '0.34s' }}>
+          <MatchInfo match={match} />
+        </div>
 
       </main>
       <Footer />

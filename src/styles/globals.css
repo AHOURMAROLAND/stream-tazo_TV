@@ -21,23 +21,46 @@
   --font-family-body:    'Syne', sans-serif;
   --font-family-mono:    'JetBrains Mono', monospace;
 
+  /* ── Animation tokens ──────────────────────────────────────── */
   --animate-pulse-live: pulse-live 1.2s ease-in-out infinite;
-  --animate-slide-up:   slideUp 0.5s cubic-bezier(0.16,1,0.3,1);
-  --animate-fade-in:    fadeIn 0.4s ease-out;
-  --animate-glow:       glow 2s ease-in-out infinite alternate;
-  --animate-shimmer:    shimmer 2s linear infinite;
+  --animate-slide-up:   slideUp   0.55s cubic-bezier(0.16,1,0.3,1) both;
+  --animate-fade-in:    fadeIn    0.45s ease-out both;
+  --animate-scale-in:   scaleIn   0.35s cubic-bezier(0.16,1,0.3,1) both;
+  --animate-left-in:    slideLeft 0.5s  cubic-bezier(0.16,1,0.3,1) both;
+  --animate-down-in:    slideDown 0.4s  cubic-bezier(0.16,1,0.3,1) both;
+  --animate-glow:       glow      2s    ease-in-out infinite alternate;
+  --animate-float:      floatY    4s    ease-in-out infinite;
+  --animate-shimmer:    shimmer   2s    linear infinite;
+  --animate-border-live: borderLive 2.5s ease-in-out infinite;
 
+  /* ── Keyframes ────────────────────────────────────────────── */
   @keyframes pulse-live {
     0%, 100% { opacity: 1; transform: scale(1); }
     50%       { opacity: 0.4; transform: scale(0.85); }
   }
   @keyframes slideUp {
-    0%   { opacity: 0; transform: translateY(24px); }
+    0%   { opacity: 0; transform: translateY(20px); }
     100% { opacity: 1; transform: translateY(0); }
   }
   @keyframes fadeIn {
     0%   { opacity: 0; }
     100% { opacity: 1; }
+  }
+  @keyframes scaleIn {
+    0%   { opacity: 0; transform: scale(0.88); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes slideLeft {
+    0%   { opacity: 0; transform: translateX(-18px); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes slideDown {
+    0%   { opacity: 0; transform: translateY(-14px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes floatY {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-5px); }
   }
   @keyframes glow {
     0%   { box-shadow: 0 0 20px rgba(0,212,255,0.15); }
@@ -45,10 +68,28 @@
   }
   @keyframes shimmer {
     0%   { background-position: -200% center; }
-    100% { background-position: 200% center; }
+    100% { background-position:  200% center; }
   }
   @keyframes spin {
     to { transform: rotate(360deg); }
+  }
+  @keyframes borderLive {
+    0%, 100% {
+      box-shadow: 0 0 0 rgba(230,57,70,0),
+                  inset 0 0 0 1px rgba(230,57,70,0.2);
+    }
+    50% {
+      box-shadow: 0 0 28px rgba(230,57,70,0.18),
+                  inset 0 0 0 1px rgba(230,57,70,0.5);
+    }
+  }
+  @keyframes ripple {
+    0%   { transform: scale(0.8); opacity: 1; }
+    100% { transform: scale(2.4); opacity: 0; }
+  }
+  @keyframes gradientX {
+    0%, 100% { background-position: 0% 50%; }
+    50%       { background-position: 100% 50%; }
   }
 }
 
@@ -92,7 +133,8 @@
 
 /* ─── Components layer: custom reusable classes ──────────────────────────── */
 @layer components {
-  /* Ambient glow blob */
+
+  /* ── Ambient glow blob ──────────────────────────────────────── */
   .ambient-top {
     position: fixed;
     top: -200px;
@@ -105,7 +147,7 @@
     z-index: 0;
   }
 
-  /* Glass card */
+  /* ── Glass card ─────────────────────────────────────────────── */
   .glass {
     background: rgba(17, 24, 39, 0.7);
     backdrop-filter: blur(12px);
@@ -113,7 +155,7 @@
     border: 1px solid rgba(30, 45, 69, 0.8);
   }
 
-  /* Shimmer text */
+  /* ── Shimmer text ───────────────────────────────────────────── */
   .shimmer-text {
     background: linear-gradient(90deg, #00d4ff 0%, #ffffff 40%, #00d4ff 60%, #ffffff 100%);
     background-size: 200% auto;
@@ -123,21 +165,34 @@
     animation: shimmer 3s linear infinite;
   }
 
-  /* Live badge glow */
+  /* ── Live badge glow ────────────────────────────────────────── */
   .live-glow {
     box-shadow: 0 0 12px rgba(230, 57, 70, 0.6), 0 0 24px rgba(230, 57, 70, 0.2);
   }
 
-  /* Card hover glow */
+  /* ── Card hover glow ────────────────────────────────────────── */
   .card-hover {
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform, box-shadow;
   }
   .card-hover:hover {
-    box-shadow: 0 8px 32px rgba(0, 212, 255, 0.12), 0 0 0 1px rgba(0, 212, 255, 0.2);
-    transform: translateY(-2px);
+    box-shadow:
+      0 8px 32px rgba(0, 212, 255, 0.12),
+      0 0 0 1px rgba(0, 212, 255, 0.2),
+      0 2px 8px rgba(0,0,0,0.4);
+    transform: translateY(-3px);
+  }
+  .card-hover:active {
+    transform: translateY(-1px) scale(0.99);
+    transition-duration: 0.1s;
   }
 
-  /* Accent glow button */
+  /* ── Live card animated border ──────────────────────────────── */
+  .card-live-border {
+    animation: borderLive 2.5s ease-in-out infinite;
+  }
+
+  /* ── Accent glow button ─────────────────────────────────────── */
   .btn-accent {
     background: linear-gradient(135deg, #00d4ff, #0099cc);
     box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
@@ -146,5 +201,47 @@
   .btn-accent:hover {
     box-shadow: 0 6px 28px rgba(0, 212, 255, 0.5);
     transform: translateY(-1px);
+  }
+  .btn-accent:active {
+    transform: translateY(0) scale(0.98);
+    transition-duration: 0.1s;
+  }
+
+  /* ── Motion entrance helpers ────────────────────────────────── */
+  /* Apply these classes to elements that should animate on mount */
+  .motion-enter { animation: slideUp   0.55s cubic-bezier(0.16,1,0.3,1) both; }
+  .motion-fade  { animation: fadeIn    0.45s ease-out both; }
+  .motion-scale { animation: scaleIn   0.35s cubic-bezier(0.16,1,0.3,1) both; }
+  .motion-left  { animation: slideLeft 0.5s  cubic-bezier(0.16,1,0.3,1) both; }
+  .motion-down  { animation: slideDown 0.4s  cubic-bezier(0.16,1,0.3,1) both; }
+
+  /* ── Image / logo hover ─────────────────────────────────────── */
+  .img-hover {
+    transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
+    will-change: transform;
+  }
+  .img-hover:hover {
+    transform: translateY(-3px) scale(1.08);
+  }
+
+  /* ── Ripple dot (for live ping) ─────────────────────────────── */
+  .ripple-dot::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: inherit;
+    animation: ripple 1.8s ease-out infinite;
+  }
+
+  /* ── Active server bar ──────────────────────────────────────── */
+  .server-active-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, transparent, #00d4ff, transparent);
+    animation: fadeIn 0.3s ease both;
   }
 }

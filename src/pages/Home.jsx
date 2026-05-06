@@ -41,25 +41,28 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 pb-8">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
               <div>
-                <div className="flex items-center gap-2 mb-2">
+                <div className="motion-left flex items-center gap-2 mb-2">
                   <div className="h-px w-8 bg-tazo-accent/60" />
                   <span className="text-tazo-accent text-[10px] font-mono tracking-[0.3em] uppercase">Football Live</span>
                 </div>
-                <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl text-tazo-text tracking-[0.08em] leading-none">
+                <h1 className="motion-enter font-display text-4xl sm:text-5xl lg:text-6xl text-tazo-text tracking-[0.08em] leading-none"
+                    style={{ animationDelay: '0.08s' }}>
                   MATCHS DU <span className="shimmer-text">JOUR</span>
                 </h1>
                 {!loading && total > 0 && (
-                  <p className="text-tazo-muted2 text-sm font-mono mt-2">
+                  <p className="motion-fade text-tazo-muted2 text-sm font-mono mt-2"
+                     style={{ animationDelay: '0.18s' }}>
                     {total} match{total > 1 ? 's' : ''} programmés
                     {live > 0 && <span className="ml-2 text-tazo-red">· {live} en direct</span>}
                   </p>
                 )}
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="motion-fade flex items-center gap-3" style={{ animationDelay: '0.14s' }}>
                 {/* Live counter */}
                 {live > 0 && (
-                  <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-tazo-red/10 border border-tazo-red/20">
+                  <div className="motion-scale flex items-center gap-3 px-4 py-3 rounded-2xl bg-tazo-red/10 border border-tazo-red/20"
+                       style={{ animationDelay: '0.22s' }}>
                     <div className="relative">
                       <div className="w-3 h-3 rounded-full bg-tazo-red animate-pulse-live" />
                       <div className="absolute inset-0 rounded-full bg-tazo-red/40 animate-ping" />

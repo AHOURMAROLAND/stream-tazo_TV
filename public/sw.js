@@ -1,13 +1,11 @@
 // TAZO TV Service Worker — PWA offline support
-const CACHE_NAME = 'tazo-tv-v1'
+const CACHE_NAME = 'tazo-tv-v2'
 
-// Assets to cache on install
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
   '/favicon.svg',
-  '/icon-192.svg',
-  '/icon-512.svg',
+  '/ptitazologo.jpeg',
 ]
 
 self.addEventListener('install', (e) => {
@@ -18,7 +16,6 @@ self.addEventListener('install', (e) => {
 })
 
 self.addEventListener('activate', (e) => {
-  // Clean old caches
   e.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
@@ -31,13 +28,28 @@ self.addEventListener('fetch', (e) => {
   const { request } = e
   const url = new URL(request.url)
 
-  // API calls — network first, no cache
-  if (url.hostname === 'kora-api.space' || url.hostname.includes('meshify')) {
-    e.respondWith(fetch(request))
-    return
-  }
+  // ── Ne jamais intercepter ──────────────────────────────────────
+  // 1. Requêtes non-HTTP (chrome-extension://, chrome-error://, etc.)
+  if (!url.protocol.startsWith('http')) return
 
-  // Navigation — network first, fallback to cached index.html
+  // 2. Toutes les APIs externes — laisser passer sans cache
+  const externalDomains = [
+    'kora-api.space',
+    'cdn.kora-api.space',
+    'thesportsdb.com',
+    'meshify.cloud',
+    'sportssonline',
+    'score808',
+    'reddit-soccer',
+    'apifootball',
+    'apiv3.apifootball',
+  ]
+  if (externalDomains.some((d) => url.hostname.includes(d))) return
+
+  // 3. Requêtes cross-origin en général — laisser passer
+  if (url.origin !== self.location.origin) return
+
+  // ── Navigation SPA — network first, fallback index.html ───────
   if (request.mode === 'navigate') {
     e.respondWith(
       fetch(request).catch(() => caches.match('/'))
@@ -45,8 +57,11 @@ self.addEventListener('fetch', (e) => {
     return
   }
 
-  // Static assets — cache first
+  // ── Assets statiques — cache first ────────────────────────────
   e.respondWith(
-    caches.match(request).then((cached) => cached || fetch(request))
+    caches.match(request).then((cached) => {
+      if (cached) return cached
+      return fetch(request).catch(() => new Response('', { status: 408 }))
+    })
   )
 })

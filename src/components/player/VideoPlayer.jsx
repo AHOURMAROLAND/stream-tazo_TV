@@ -30,6 +30,15 @@ export default function VideoPlayer({ src, onStreamError, onReady }) {
   useEffect(() => { setReady(false) }, [src])
   useEffect(() => { onReady?.(ready) }, [ready])
 
+  // Timeout de chargement — si pas de signal après 15s (m3u8) ou 20s (iframe), on signale l'erreur
+  useEffect(() => {
+    if (!src || ready) return
+    const timeout = setTimeout(() => {
+      if (!ready) onStreamError?.()
+    }, isM3u8 ? 15000 : 20000)
+    return () => clearTimeout(timeout)
+  }, [src, ready])
+
   useEffect(() => {
     const off = () => setIsOffline(true)
     const on  = () => setIsOffline(false)
@@ -68,12 +77,21 @@ export default function VideoPlayer({ src, onStreamError, onReady }) {
       const hls = new Hls({
         maxBufferLength: 30, maxMaxBufferLength: 60,
         maxBufferSize: 60 * 1000 * 1000,
-        fragLoadingMaxRetry: 6, manifestLoadingMaxRetry: 4,
+        fragLoadingMaxRetry: 2, manifestLoadingMaxRetry: 1,
+        manifestLoadingTimeOut: 8000,
+        fragLoadingTimeOut: 8000,
       })
       hls.loadSource(src)
       hls.attachMedia(video)
       hls.on(Hls.Events.MANIFEST_PARSED, () => { setReady(true); video.play().catch(() => {}) })
-      hls.on(Hls.Events.ERROR, (_, data) => { if (data.fatal) onStreamError?.() })
+      hls.on(Hls.Events.ERROR, (_, data) => {
+        if (data.fatal) {
+          onStreamError?.()
+        } else if (data.type === Hls.ErrorTypes.NETWORK_ERROR && data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR) {
+          // Manifest introuvable même non-fatal → on abandonne directement
+          onStreamError?.()
+        }
+      })
       hlsRef.current = hls
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
       video.src = src
@@ -144,7 +162,11 @@ export default function VideoPlayer({ src, onStreamError, onReady }) {
             allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
             sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
             title="TAZO TV Stream"
-            onLoad={() => setReady(true)}
+            onLoad={() => {
+              // Délai court pour laisser le temps à la page de se rendre
+              // (évite de marquer ready sur une page d'erreur qui charge instantanément)
+              setTimeout(() => setReady(true), 800)
+            }}
           />
         </div>
 

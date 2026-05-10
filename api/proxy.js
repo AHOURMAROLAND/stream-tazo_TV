@@ -9,12 +9,19 @@ export default async function handler(req, res) {
 
   const target = decodeURIComponent(url)
 
+  // Adapter le Referer selon la source du stream
+  const isYalla = target.includes('yallashoooootlive') || target.includes('yallashootttv') ||
+                  target.includes('shootwithyalla') || target.includes('yallaliveshoot') ||
+                  target.includes('kora-live-live') || target.includes('yallaliveshoot.info')
+  const referer = isYalla ? 'https://vv.shootwithyalla.com/' : 'https://vip.kora-top.zip/'
+  const origin  = isYalla ? 'https://vv.shootwithyalla.com'  : 'https://vip.kora-top.zip'
+
   try {
     const response = await fetch(target, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Referer':    'https://vip.kora-top.zip/',
-        'Origin':     'https://vip.kora-top.zip',
+        'Referer':    referer,
+        'Origin':     origin,
       },
     })
 

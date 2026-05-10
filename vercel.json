@@ -12,6 +12,9 @@
     "api/proxy.js": {
       "maxDuration": 30
     },
+    "api/stream.js": {
+      "maxDuration": 15
+    },
     "api/match.js": {
       "maxDuration": 10
     },

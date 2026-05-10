@@ -26,7 +26,7 @@ import useFavorites from '../hooks/useFavorites'
 import useTeamFavorites from '../hooks/useTeamFavorites'
 import useAppStore from '../store/useAppStore'
 
-import { getStreamUrl, proxyM3u8 } from '../api/streamApi'
+import { getStreamUrl } from '../api/streamApi'
 
 export default function Match() {
   const { id }   = useParams()
@@ -123,17 +123,25 @@ export default function Match() {
     setIframeReady(false)
     setSwitchMsg('Connexion...')
 
-    // Tenter d'obtenir le m3u8 via meshify
+    // Tenter d'obtenir le m3u8 via serverless /api/stream
     const m3u8 = await getStreamUrl(channel)
 
     if (m3u8) {
-      // Passer par le proxy Vercel → IP européenne
-      const proxied = proxyM3u8(m3u8)
-      streamRef.current = proxied
-      setStreamUrl(proxied)
+      streamRef.current = m3u8
+      setStreamUrl(m3u8)
       setSwitchMsg(null)
     } else {
-      // Fallback : mobile_link en priorité, sinon link direct (chaînes edge comme beIN, ESPN...)
+      // Fallback 1 : construire l'URL shootwithyalla depuis le ch (beIN, ESPN, etc.)
+      const ch = channel.ch || channel.key || null
+      if (ch) {
+        const yallaIframe = `https://vv.shootwithyalla.com/albaplayer/${ch}/`
+        streamRef.current = yallaIframe
+        setStreamUrl(yallaIframe)
+        setSwitchMsg(null)
+        return
+      }
+
+      // Fallback 2 : mobile_link ou link direct
       const fallback = channel.mobile_link || channel.link || null
       streamRef.current = fallback
       setStreamUrl(fallback)

@@ -160,7 +160,6 @@ export default function VideoPlayer({ src, onStreamError, onReady }) {
             src={src}
             className="absolute inset-0 w-full h-full border-0"
             allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
             title="TAZO TV Stream"
             onLoad={() => {
               // Délai court pour laisser le temps à la page de se rendre

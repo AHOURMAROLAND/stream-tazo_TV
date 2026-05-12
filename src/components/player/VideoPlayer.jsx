@@ -2,6 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import Hls from 'hls.js'
 import { IconFullscreen, IconExitFullscreen } from '../ui/Icons'
 
+/** Limite les iframes tierces : pas de popups ni de navigation de l’onglet parent (souvent utilisé par les pubs). */
+const IFRAME_SANDBOX =
+  'allow-scripts allow-same-origin allow-presentation allow-fullscreen'
+
 function preconnect(url) {
   if (!url) return
   try {
@@ -22,12 +26,18 @@ export default function VideoPlayer({ src, onStreamError, onReady }) {
   const [ready,        setReady]        = useState(false)
   const [isOffline,    setIsOffline]    = useState(!navigator.onLine)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [volume,       setVolume]       = useState(1)
+  const [muted,        setMuted]        = useState(false)
 
   const isM3u8   = src && (src.includes('.m3u8') || src.includes('m3u8'))
   const isIframe = src && !isM3u8
 
   useEffect(() => { if (src) preconnect(src) }, [src])
-  useEffect(() => { setReady(false) }, [src])
+  useEffect(() => {
+    setReady(false)
+    setVolume(1)
+    setMuted(false)
+  }, [src])
   useEffect(() => { onReady?.(ready) }, [ready])
 
   // Timeout de chargement — si pas de signal après 15s (m3u8) ou 20s (iframe), on signale l'erreur
@@ -100,6 +110,25 @@ export default function VideoPlayer({ src, onStreamError, onReady }) {
     return () => { if (hlsRef.current) { hlsRef.current.destroy(); hlsRef.current = null } }
   }, [src])
 
+  // Volume (flux natif / HLS uniquement — pas contrôlable depuis l’extérieur pour une iframe)
+  useEffect(() => {
+    const v = videoRef.current
+    if (!v || isIframe) return
+    v.volume = volume
+    v.muted = muted
+  }, [volume, muted, src, isIframe, ready])
+
+  useEffect(() => {
+    const v = videoRef.current
+    if (!v || isIframe) return
+    const onVol = () => {
+      setVolume(v.volume)
+      setMuted(v.muted)
+    }
+    v.addEventListener('volumechange', onVol)
+    return () => v.removeEventListener('volumechange', onVol)
+  }, [src, isIframe])
+
   if (!src) return null
 
   // Fullscreen button — shared between both player types
@@ -159,6 +188,8 @@ export default function VideoPlayer({ src, onStreamError, onReady }) {
             key={src}
             src={src}
             className="absolute inset-0 w-full h-full border-0"
+            sandbox={IFRAME_SANDBOX}
+            referrerPolicy="no-referrer-when-downgrade"
             allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
             title="TAZO TV Stream"
             onLoad={() => {
@@ -177,17 +208,82 @@ export default function VideoPlayer({ src, onStreamError, onReady }) {
 
   // ── HLS / native video ──
   return (
-    <div ref={containerRef} className="relative aspect-video bg-tazo-surface rounded-2xl overflow-hidden border border-tazo-border/60">
-      {!ready && (
-        <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-          <div className="relative w-14 h-14">
-            <div className="absolute inset-0 rounded-full border-2 border-tazo-border" />
-            <div className="absolute inset-0 rounded-full border-2 border-tazo-accent border-t-transparent animate-spin" />
+    <div ref={containerRef} className="relative rounded-2xl overflow-hidden border border-tazo-border/60 bg-tazo-surface">
+      <div className="relative aspect-video">
+        {!ready && (
+          <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+            <div className="relative w-14 h-14">
+              <div className="absolute inset-0 rounded-full border-2 border-tazo-border" />
+              <div className="absolute inset-0 rounded-full border-2 border-tazo-accent border-t-transparent animate-spin" />
+            </div>
           </div>
+        )}
+        <video
+          ref={videoRef}
+          controls
+          playsInline
+          className="w-full h-full object-contain"
+          controlsList="nodownload"
+        />
+        {FullscreenBtn}
+      </div>
+
+      {/* Volume hors du petit contrôle natif — évite les clics ratés sur mobile */}
+      {ready && (
+        <div className="flex items-center gap-3 px-3 py-2.5 border-t border-tazo-border/50 bg-tazo-card/90">
+          <button
+            type="button"
+            onClick={() => {
+              const v = videoRef.current
+              if (!v) return
+              if (v.muted || v.volume === 0) {
+                v.muted = false
+                if (v.volume === 0) v.volume = 0.8
+                setMuted(false)
+                setVolume(v.volume)
+              } else {
+                v.muted = true
+                setMuted(true)
+              }
+            }}
+            title={muted ? 'Activer le son' : 'Couper le son'}
+            className="shrink-0 w-9 h-9 rounded-lg bg-tazo-surface border border-tazo-border/60 text-tazo-muted2 hover:text-tazo-text hover:border-tazo-border2 flex items-center justify-center transition-colors"
+          >
+            {muted || volume === 0 ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                <line x1="23" y1="9" x2="17" y2="15" />
+                <line x1="17" y1="9" x2="23" y2="15" />
+              </svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                <path d="M15.54 8.46a5 5 0 010 7.07" />
+                <path d="M19.07 4.93a10 10 0 010 14.14" />
+              </svg>
+            )}
+          </button>
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.01}
+            value={muted ? 0 : volume}
+            onChange={(e) => {
+              const n = Number(e.target.value)
+              const v = videoRef.current
+              if (v) {
+                v.volume = n
+                v.muted = n === 0
+                setVolume(n)
+                setMuted(n === 0)
+              }
+            }}
+            title="Volume"
+            className="flex-1 h-1.5 accent-tazo-accent rounded-full bg-tazo-border cursor-pointer"
+          />
         </div>
       )}
-      <video ref={videoRef} controls playsInline className="w-full h-full object-contain" />
-      {FullscreenBtn}
     </div>
   )
 }

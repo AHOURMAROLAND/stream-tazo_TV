@@ -71,7 +71,8 @@ export default function MiniPlayer() {
               className="absolute inset-0 w-full h-full border-0"
               allowFullScreen
               allow="autoplay; fullscreen; encrypted-media"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
+              sandbox="allow-scripts allow-same-origin allow-presentation allow-fullscreen"
+              referrerPolicy="no-referrer-when-downgrade"
               title="TAZO TV Mini Player"
             />
           )}

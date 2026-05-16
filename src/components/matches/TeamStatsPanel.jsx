@@ -2,8 +2,8 @@ import useTeamStats from '../../hooks/useTeamStats'
 import useTeamFavorites from '../../hooks/useTeamFavorites'
 import { IconStar, IconClose } from '../ui/Icons'
 
-export default function TeamStatsPanel({ teamName, teamLogo, onClose }) {
-  const { data, loading } = useTeamStats(teamName)
+export default function TeamStatsPanel({ teamName, teamLogo, leagueName, onClose }) {
+  const { data, loading } = useTeamStats(teamName, leagueName)
   const { isTeamFav, toggleTeam } = useTeamFavorites()
   const isFav = isTeamFav(teamName)
 

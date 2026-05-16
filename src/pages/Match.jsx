@@ -21,7 +21,6 @@ import useMatchMeta from '../hooks/useMatchMeta'
 import useKeyboardShortcuts from '../hooks/useKeyboardShortcuts'
 import useCommentary from '../hooks/useCommentary'
 import useMatchStats from '../hooks/useMatchStats'
-import useMatchExpiry from '../hooks/useMatchExpiry'
 import useFavorites from '../hooks/useFavorites'
 import useTeamFavorites from '../hooks/useTeamFavorites'
 import useAppStore from '../store/useAppStore'
@@ -80,8 +79,6 @@ export default function Match() {
 
   useDocumentTitle(match)
   useMatchMeta(match)
-
-  const { isExpired, minutesLeft } = useMatchExpiry(match)
 
   const { events, loading: commLoading } = useCommentary(
     match?.api_matche_id,
@@ -322,42 +319,14 @@ export default function Match() {
           </div>
         )}
 
-        {/* Expired match notice */}
-        {isExpired && (
-          <div className="mb-6 relative overflow-hidden rounded-3xl">
-            <div className="absolute inset-0 bg-tazo-card" />
-            <div className="absolute inset-0 rounded-3xl border border-tazo-border/40" />
-            <div className="relative p-6 flex flex-col items-center gap-3 text-center">
-              <div className="w-12 h-12 rounded-2xl bg-tazo-muted/10 border border-tazo-border flex items-center justify-center">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-tazo-muted2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
-                </svg>
-              </div>
-              <div>
-                <p className="font-display text-lg text-tazo-muted2 tracking-wider">LIEN EXPIRÉ</p>
-                <p className="text-tazo-muted text-xs font-mono mt-1">
-                  Ce match s'est terminé il y a plus de 30 minutes. Les streams ne sont plus disponibles.
-                </p>
-              </div>
-              <button
-                onClick={() => navigate('/')}
-                className="mt-2 px-4 py-2 rounded-xl btn-accent text-tazo-bg text-sm font-mono font-bold"
-              >
-                Voir les matchs du jour
-              </button>
-            </div>
-          </div>
-        )}
-
-        {match.channels && match.channels.length > 0 && !isExpired && (
+        {match.channels && match.channels.length > 0 && (
           <div className="rounded-3xl border border-tazo-border/60 bg-tazo-card">
             <div className="p-6 sm:p-8">
               <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-3">
                   <div className="w-1 h-5 rounded-full bg-tazo-accent/60" />
                   <h2 className="font-display text-2xl text-tazo-text tracking-wider">
-                    {isFinished ? 'REPLAY / RÉSUMÉ' : 'SERVEURS'}
+                    {isFinished ? 'CHAÎNES / REPLAY' : 'SERVEURS'}
                   </h2>
                   <span className="text-xs font-mono text-tazo-muted2 px-2 py-0.5 rounded-full border border-tazo-border bg-tazo-surface/50">
                     {match.channels.length}
@@ -375,7 +344,7 @@ export default function Match() {
                 <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-xl bg-tazo-muted/10 border border-tazo-border/40">
                   <span className="w-1.5 h-1.5 rounded-full bg-tazo-muted2" />
                   <span className="text-tazo-muted2 text-xs font-mono">
-                    Match terminé — les streams peuvent afficher un résumé ou être indisponibles
+                    Match terminé — les chaînes restent actives pour la suite des programmes
                   </span>
                 </div>
               )}
@@ -398,7 +367,7 @@ export default function Match() {
         )}
 
         {/* No stream / no channels */}
-        {(!match.channels || match.channels.length === 0) && !isExpired && (
+        {(!match.channels || match.channels.length === 0) && (
           <div className="relative overflow-hidden rounded-3xl">
             <div className="absolute inset-0 bg-tazo-card" />
             <div className="absolute inset-0 rounded-3xl border border-tazo-border/40" />
@@ -457,6 +426,7 @@ export default function Match() {
         <TeamStatsPanel
           teamName={selectedTeam.name}
           teamLogo={selectedTeam.logo}
+          leagueName={match.league_en}
           onClose={() => setSelectedTeam(null)}
         />
       )}

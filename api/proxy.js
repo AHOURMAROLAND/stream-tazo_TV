@@ -1,4 +1,14 @@
 export default async function handler(req, res) {
+  // 1. Restriction d'accès : seulement localhost ou les domaines vercel
+  const host    = req.headers.host || ''
+  const referer = req.headers.referer || ''
+  const isLocal = host.includes('localhost') || host.includes('127.0.0.1')
+  const isVercel = host.includes('vercel.app') || referer.includes('vercel.app')
+
+  if (!isLocal && !isVercel) {
+    return res.status(403).json({ error: 'Access forbidden' })
+  }
+
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
 

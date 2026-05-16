@@ -22,10 +22,35 @@ export const fetchPlayerRatings = async (eventId) => {
   return res.data?.lineup || []
 }
 
-export const fetchTeamStats = async (teamName) => {
+export const fetchTeamStats = async (teamName, leagueName = '') => {
   const search = await axios.get(`${BASE}/searchteams.php?t=${encodeURIComponent(teamName)}`)
-  const team   = search.data?.teams?.[0]
-  if (!team) return null
+  const teams  = search.data?.teams || []
+
+  if (teams.length === 0) return null
+
+  // 1. Essayer de trouver une correspondance exacte sur le nom
+  let team = teams.find((t) => 
+    t.strTeam?.toLowerCase() === teamName.toLowerCase() || 
+    t.strTeamAlternate?.toLowerCase().includes(teamName.toLowerCase())
+  )
+
+  // 2. Si on a la ligue, essayer de filtrer par ligue pour éviter les homonymes (ex: Al-Nassr KSA vs UAE)
+  if (leagueName) {
+    const leagueLower = leagueName.toLowerCase()
+    const filtered = teams.filter((t) => 
+      t.strLeague?.toLowerCase().includes(leagueLower) || 
+      t.strLeague2?.toLowerCase().includes(leagueLower) ||
+      t.strLeague3?.toLowerCase().includes(leagueLower)
+    )
+    if (filtered.length > 0) {
+      // Parmi ceux de la ligue, on prend le meilleur match de nom
+      const bestMatchInLeague = filtered.find((t) => t.strTeam?.toLowerCase() === teamName.toLowerCase())
+      team = bestMatchInLeague || filtered[0]
+    }
+  }
+
+  // 3. Fallback sur le premier résultat si rien de mieux
+  if (!team) team = teams[0]
 
   const events = await axios.get(`${BASE}/eventslast.php?id=${team.idTeam}`)
   return {

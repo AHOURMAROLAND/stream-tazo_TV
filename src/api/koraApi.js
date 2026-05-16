@@ -17,14 +17,24 @@ export const fetchMatches = async (date = getToday(), { forceRefresh = false } =
     if (cached) return cached
   }
 
-  const t   = getTimestamp()
-  const res = await api.get(`/api/matches/${date}/1?t=${t}`)
-
-  // Shorter TTL if there are live matches
-  const hasLive = res.data?.matches?.some((m) => parseInt(m.status) === 1)
-  cacheSet(cacheKey, res.data, hasLive ? LIVE_TTL : DEFAULT_TTL)
-
-  return res.data
+  const t = getTimestamp()
+  try {
+    const res = await api.get(`/api/matches/${date}/1?t=${t}`)
+    
+    if (res.data?.matches) {
+      // Shorter TTL if there are live matches
+      const hasLive = res.data.matches.some((m) => parseInt(m.status) === 1)
+      cacheSet(cacheKey, res.data, hasLive ? LIVE_TTL : DEFAULT_TTL)
+      return res.data
+    }
+    throw new Error('Invalid data format')
+  } catch (err) {
+    console.warn('[koraApi] Failed to fetch matches, trying fallback cache', err)
+    // Fallback : renvoyer le cache même s'il est expiré (si disponible)
+    const expiredCache = cacheGet(cacheKey, { ignoreExpiry: true })
+    if (expiredCache) return expiredCache
+    throw err
+  }
 }
 
 export const fetchMatch = async (id, lang = 'en') => {
@@ -32,11 +42,20 @@ export const fetchMatch = async (id, lang = 'en') => {
   const cached   = cacheGet(cacheKey)
   if (cached) return cached
 
-  const t   = getTimestamp()
-  const res = await api.get(`/api/matche/${id}/${lang}?t=${t}`)
-
-  const isLive = parseInt(res.data?.status) === 1
-  cacheSet(cacheKey, res.data, isLive ? LIVE_TTL : DEFAULT_TTL)
-
-  return res.data
+  const t = getTimestamp()
+  try {
+    const res = await api.get(`/api/matche/${id}/${lang}?t=${t}`)
+    
+    if (res.data) {
+      const isLive = parseInt(res.data.status) === 1
+      cacheSet(cacheKey, res.data, isLive ? LIVE_TTL : DEFAULT_TTL)
+      return res.data
+    }
+    throw new Error('Invalid match data')
+  } catch (err) {
+    console.warn('[koraApi] Failed to fetch match, trying fallback cache', err)
+    const expiredCache = cacheGet(cacheKey, { ignoreExpiry: true })
+    if (expiredCache) return expiredCache
+    throw err
+  }
 }

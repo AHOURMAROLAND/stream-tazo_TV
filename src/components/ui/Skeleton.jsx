@@ -56,31 +56,36 @@ export function MatchPageSkeleton() {
 
         {/* League + badge */}
         <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-2">
-            <div className="w-1 h-4 rounded-full bg-tazo-border" />
-            <Skeleton className="h-3 w-36" />
+          <div className="flex items-center gap-3">
+            <Skeleton className="w-12 h-12 rounded-xl" />
+            <Skeleton className="h-4 w-40 rounded-lg" />
           </div>
-          <Skeleton className="h-6 w-16 rounded-full" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-6 w-16 rounded-full" />
+            <Skeleton className="h-9 w-9 rounded-xl" />
+          </div>
         </div>
 
         {/* Teams + score */}
-        <div className="flex items-center justify-between gap-4 sm:gap-8">
+        <div className="flex items-center justify-between gap-4 sm:gap-8 mb-8">
           {/* Home team */}
           <div className="flex flex-col items-center gap-3 flex-1">
-            <Skeleton className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl" />
-            <Skeleton className="h-3 w-24" />
+            <Skeleton className="w-16 h-16 sm:w-24 sm:h-24 rounded-2xl" />
+            <Skeleton className="h-3.5 w-24 rounded-lg" />
+            <Skeleton className="h-2 w-16 rounded-lg" />
           </div>
 
           {/* Center score */}
           <div className="flex flex-col items-center gap-2 flex-shrink-0">
-            <Skeleton className="h-14 sm:h-20 w-28 sm:w-36 rounded-2xl" />
-            <Skeleton className="h-2.5 w-20" />
+            <Skeleton className="h-14 sm:h-20 w-28 sm:w-40 rounded-2xl" />
+            <Skeleton className="h-3 w-24 rounded-lg" />
           </div>
 
           {/* Away team */}
           <div className="flex flex-col items-center gap-3 flex-1">
-            <Skeleton className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl" />
-            <Skeleton className="h-3 w-24" />
+            <Skeleton className="w-16 h-16 sm:w-24 sm:h-24 rounded-2xl" />
+            <Skeleton className="h-3.5 w-24 rounded-lg" />
+            <Skeleton className="h-2 w-16 rounded-lg" />
           </div>
         </div>
       </div>
@@ -91,20 +96,21 @@ export function MatchPageSkeleton() {
 
         {/* Title */}
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-1 h-5 rounded-full bg-tazo-border" />
-          <Skeleton className="h-6 w-48" />
-          <Skeleton className="h-5 w-7 rounded-full" />
+          <div className="w-1 h-5 rounded-full bg-tazo-accent" />
+          <Skeleton className="h-6 w-48 rounded-lg" />
         </div>
 
         {/* Server buttons */}
         <div className="flex flex-wrap gap-2 mb-6">
-          {[80, 96, 72, 88].map((w, i) => (
-            <Skeleton key={i} className={`h-9 w-${w === 80 ? '20' : w === 96 ? '24' : w === 72 ? '[72px]' : '22'} rounded-xl`} style={{ width: `${w}px` }} />
+          {[100, 110, 90, 120].map((w, i) => (
+            <Skeleton key={i} className="h-10 rounded-xl" style={{ width: `${w}px` }} />
           ))}
         </div>
 
         {/* Video placeholder */}
-        <Skeleton className="w-full aspect-video rounded-2xl" />
+        <div className="relative aspect-video rounded-2xl overflow-hidden bg-tazo-surface border border-tazo-border/40">
+           <Skeleton className="w-full h-full" />
+        </div>
       </div>
     </div>
   )

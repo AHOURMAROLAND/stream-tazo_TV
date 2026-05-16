@@ -1,10 +1,11 @@
 // Cache simple en mémoire avec TTL
 const store = new Map()
 
-export function cacheGet(key) {
+export function cacheGet(key, { ignoreExpiry = false } = {}) {
   const entry = store.get(key)
   if (!entry) return null
-  if (Date.now() > entry.expiresAt) {
+  
+  if (!ignoreExpiry && Date.now() > entry.expiresAt) {
     store.delete(key)
     return null
   }

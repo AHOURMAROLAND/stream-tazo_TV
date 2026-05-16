@@ -22,35 +22,57 @@ export const fetchPlayerRatings = async (eventId) => {
   return res.data?.lineup || []
 }
 
+const normalize = (s) => s?.toLowerCase().replace(/[^a-z0-9]/g, '').trim() || ''
+
 export const fetchTeamStats = async (teamName, leagueName = '') => {
-  const search = await axios.get(`${BASE}/searchteams.php?t=${encodeURIComponent(teamName)}`)
-  const teams  = search.data?.teams || []
+  if (!teamName) return null
 
-  if (teams.length === 0) return null
-
-  // 1. Essayer de trouver une correspondance exacte sur le nom
-  let team = teams.find((t) => 
-    t.strTeam?.toLowerCase() === teamName.toLowerCase() || 
-    t.strTeamAlternate?.toLowerCase().includes(teamName.toLowerCase())
-  )
-
-  // 2. Si on a la ligue, essayer de filtrer par ligue pour éviter les homonymes (ex: Al-Nassr KSA vs UAE)
-  if (leagueName) {
-    const leagueLower = leagueName.toLowerCase()
-    const filtered = teams.filter((t) => 
-      t.strLeague?.toLowerCase().includes(leagueLower) || 
-      t.strLeague2?.toLowerCase().includes(leagueLower) ||
-      t.strLeague3?.toLowerCase().includes(leagueLower)
-    )
-    if (filtered.length > 0) {
-      // Parmi ceux de la ligue, on prend le meilleur match de nom
-      const bestMatchInLeague = filtered.find((t) => t.strTeam?.toLowerCase() === teamName.toLowerCase())
-      team = bestMatchInLeague || filtered[0]
+  const findBestMatch = (teamsList, targetName, targetLeague) => {
+    const normTarget = normalize(targetName)
+    const normLeague = normalize(targetLeague)
+    
+    // Priorité 1 : Match exact du nom ET match de la ligue
+    if (targetLeague) {
+      const match = teamsList.find(t => 
+        normalize(t.strTeam) === normTarget && 
+        (normalize(t.strLeague).includes(normLeague) || normalize(t.strLeague2).includes(normLeague))
+      )
+      if (match) return match
     }
+
+    // Priorité 2 : Match exact du nom
+    const exactName = teamsList.find(t => normalize(t.strTeam) === normTarget)
+    if (exactName) return exactName
+
+    // Priorité 3 : Match partiel (contient le nom)
+    const partialName = teamsList.find(t => normalize(t.strTeam).includes(normTarget) || normTarget.includes(normalize(t.strTeam)))
+    if (partialName) return partialName
+
+    return null
   }
 
-  // 3. Fallback sur le premier résultat si rien de mieux
-  if (!team) team = teams[0]
+  // 1. Première tentative avec le nom tel quel
+  let search = await axios.get(`${BASE}/searchteams.php?t=${encodeURIComponent(teamName)}`)
+  let teams  = search.data?.teams || []
+  let team   = findBestMatch(teams, teamName, leagueName)
+
+  // 2. Si pas de match convaincant et qu'il y a un tiret, on essaie avec un espace
+  if (!team && teamName.includes('-')) {
+    const altName = teamName.replace(/-/g, ' ')
+    search = await axios.get(`${BASE}/searchteams.php?t=${encodeURIComponent(altName)}`)
+    const altTeams = search.data?.teams || []
+    team = findBestMatch(altTeams, altName, leagueName)
+  }
+
+  // 3. Si toujours rien, on essaie de chercher juste la fin du nom (ex: "Al-Nassr" -> "Nassr")
+  if (!team && teamName.toLowerCase().startsWith('al-')) {
+    const shortName = teamName.substring(3)
+    search = await axios.get(`${BASE}/searchteams.php?t=${encodeURIComponent(shortName)}`)
+    const shortTeams = search.data?.teams || []
+    team = findBestMatch(shortTeams, shortName, leagueName)
+  }
+
+  if (!team) return null
 
   const events = await axios.get(`${BASE}/eventslast.php?id=${team.idTeam}`)
   return {

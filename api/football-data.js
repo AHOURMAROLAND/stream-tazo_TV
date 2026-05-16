@@ -1,106 +1,97 @@
 import axios from 'axios'
 
-const API_FOOTBALL_BASE = 'https://apiv3.apifootball.com'
-const API_KEY = process.env.VITE_APIFOOTBALL_KEY
-
 /**
- * Cette fonction serverless agit comme une "Mini BD" sur le serveur (via le cache Vercel).
- * Elle récupère les données, les transforme et demande à Vercel de les garder en cache
- * de manière permanente pour les matchs terminés.
+ * Configuration pour API-Football (v3)
+ * On supporte deux modes d'authentification :
+ * 1. RapidAPI (x-rapidapi-key) - Recommandé pour le plan Free
+ * 2. Direct (x-apisports-key)
  */
-export default async function handler(req, res) {
-  const { matchId, status } = req.query
+const API_KEY = process.env.VITE_APIFOOTBALL_KEY
+const IS_RAPID_API = API_KEY?.length > 40 || process.env.USE_RAPIDAPI === 'true'
 
-  if (!matchId) {
-    return res.status(400).json({ error: 'Missing matchId' })
+const BASE_URL = IS_RAPID_API 
+  ? 'https://api-football-v1.p.rapidapi.com/v3'
+  : 'https://v3.football.api-sports.io'
+
+const HEADERS = IS_RAPID_API 
+  ? { 'x-rapidapi-host': 'api-football-v1.p.rapidapi.com', 'x-rapidapi-key': API_KEY }
+  : { 'x-apisports-key': API_KEY }
+
+export default async function handler(req, res) {
+  const { matchId, status, fixtureId } = req.query
+  const id = fixtureId || matchId // Supporte les deux noms de paramètres
+
+  if (!id) {
+    return res.status(400).json({ error: 'Missing match/fixture ID' })
   }
 
-  // Si le match est terminé, on autorise un cache très long (1 an = permanent sur Vercel Edge)
-  const isFinished = status === 'Finished' || status === '2'
+  // ── Cache Management ──────────────────────────────────────
+  const isFinished = status === 'Finished' || status === 'FT' || status === '2'
   if (isFinished) {
     res.setHeader('Cache-Control', 's-maxage=31536000, stale-while-revalidate=31536000')
   } else {
-    // Pendant le match, on cache seulement 30 secondes
     res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60')
   }
 
   try {
-    const response = await axios.get(`${API_FOOTBALL_BASE}/?action=get_events&match_id=${matchId}&APIkey=${API_KEY}`)
-    const data = response.data
+    // API-Football v3 utilise l'endpoint /fixtures
+    const response = await axios.get(`${BASE_URL}/fixtures`, {
+      params: { id: id },
+      headers: HEADERS
+    })
 
-    if (!Array.isArray(data) || data.length === 0) {
-      return res.status(404).json({ error: 'Match not found' })
+    const fixture = response.data?.response?.[0]
+
+    if (!fixture) {
+      return res.status(404).json({ error: 'Match not found in API-Football v3' })
     }
-
-    const matchData = data[0]
     
-    // Structure simplifiée et propre pour notre application
+    // Structure transformée pour TAZO TV
     const result = {
-      id: matchId,
-      status: matchData.match_status,
+      id: id,
+      status: fixture.fixture.status.short,
       score: {
-        home: matchData.match_hometeam_score,
-        away: matchData.match_awayteam_score
+        home: fixture.goals.home,
+        away: fixture.goals.away
       },
-      stats: parseStats(matchData.statistics || []),
-      events: parseEvents(matchData),
-      lineups: matchData.lineup || { home: [], away: [] },
-      lastUpdate: new Date().toISOString()
+      stats: parseStatsV3(fixture.statistics || []),
+      events: parseEventsV3(fixture.events || []),
+      lineups: fixture.lineups || [],
+      lastUpdate: new Date().toISOString(),
+      venue: fixture.fixture.venue,
+      referee: fixture.fixture.referee
     }
 
     return res.status(200).json(result)
 
   } catch (error) {
-    console.error('[API-FOOTBALL PROXY ERROR]', error.message)
-    return res.status(500).json({ error: 'Failed to fetch match data' })
+    console.error('[API-FOOTBALL V3 ERROR]', error.response?.data || error.message)
+    return res.status(500).json({ error: 'Failed to fetch data from API-Football v3' })
   }
 }
 
-function parseStats(statistics) {
+function parseStatsV3(statistics) {
   const stats = {}
-  statistics.forEach(s => {
-    const key = s.type.toLowerCase().replace(/\s/g, '_')
-    stats[key] = { home: s.home, away: s.away }
+  // statistics est un tableau par équipe [{ team: {}, statistics: [] }, ...]
+  statistics.forEach(teamStats => {
+    const side = teamStats.team.id === statistics[0].team.id ? 'home' : 'away'
+    teamStats.statistics.forEach(s => {
+      const key = s.type.toLowerCase().replace(/\s/g, '_')
+      if (!stats[key]) stats[key] = { home: 0, away: 0 }
+      stats[key][side] = s.value
+    })
   })
   return stats
 }
 
-function parseEvents(match) {
-  const events = []
-  // Buts
-  ;(match.goalscorer || []).forEach(g => {
-    events.push({
-      time: g.time,
-      type: 'goal',
-      team: g.home_scorer ? 'home' : 'away',
-      player: g.home_scorer || g.away_scorer,
-      assist: g.home_assist || g.away_assist
-    })
-  })
-  // Cartons
-  ;(match.cards || []).forEach(c => {
-    events.push({
-      time: c.time,
-      type: c.fault?.toLowerCase().includes('yellow') ? 'yellow' : 'red',
-      team: c.home_fault ? 'home' : 'away',
-      player: c.home_fault || c.away_fault
-    })
-  })
-  // Remplacements
-  if (match.substitutions) {
-    // API-Football regroupe parfois les subs différemment selon la version
-    const subs = match.substitutions.home || match.substitutions.away || []
-    if (Array.isArray(subs)) {
-       subs.forEach(s => {
-         events.push({
-           time: s.time,
-           type: 'substitution',
-           team: match.substitutions.home?.includes(s) ? 'home' : 'away',
-           player: s.substitution.replace(' | ', ' -> ')
-         })
-       })
-    }
-  }
-  
-  return events.sort((a, b) => parseInt(a.time) - parseInt(b.time))
+function parseEventsV3(events) {
+  return events.map(e => ({
+    time: e.time.elapsed + (e.time.extra ? `+${e.time.extra}` : ''),
+    type: e.type.toLowerCase(), // goal, card, subst, var
+    detail: e.detail,
+    team: e.comments, // Contient souvent le côté ou des infos
+    player: e.player.name,
+    assist: e.assist?.name || null,
+    side: e.team.name // Nom de l'équipe pour filtrage UI
+  }))
 }

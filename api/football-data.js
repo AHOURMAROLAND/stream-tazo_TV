@@ -6,7 +6,7 @@ import axios from 'axios'
  * 1. RapidAPI (x-rapidapi-key) - Recommandé pour le plan Free
  * 2. Direct (x-apisports-key)
  */
-const API_KEY = process.env.VITE_APIFOOTBALL_KEY
+const API_KEY = process.env.APIFOOTBALL_KEY
 const IS_RAPID_API = API_KEY?.length > 40 || process.env.USE_RAPIDAPI === 'true'
 
 const BASE_URL = IS_RAPID_API 
@@ -72,10 +72,10 @@ export default async function handler(req, res) {
 
 function parseStatsV3(statistics) {
   const stats = {}
-  // statistics est un tableau par équipe [{ team: {}, statistics: [] }, ...]
-  statistics.forEach(teamStats => {
-    const side = teamStats.team.id === statistics[0].team.id ? 'home' : 'away'
-    teamStats.statistics.forEach(s => {
+  if (!Array.isArray(statistics)) return stats
+  statistics.forEach((teamStats, idx) => {
+    const side = idx === 0 ? 'home' : 'away'
+    ;(teamStats.statistics || []).forEach(s => {
       const key = s.type.toLowerCase().replace(/\s/g, '_')
       if (!stats[key]) stats[key] = { home: 0, away: 0 }
       stats[key][side] = s.value

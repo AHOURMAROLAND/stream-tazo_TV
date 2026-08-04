@@ -4,7 +4,6 @@ const CACHE_NAME = 'tazo-tv-v2'
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
-  '/favicon.svg',
   '/ptitazologo.jpeg',
 ]
 

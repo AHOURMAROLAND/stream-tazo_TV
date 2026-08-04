@@ -20,6 +20,12 @@
     },
     "api/home.js": {
       "maxDuration": 10
+    },
+    "api/og-home.js": {
+      "maxDuration": 10
+    },
+    "api/og.js": {
+      "maxDuration": 10
     }
   }
 }

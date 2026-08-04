@@ -46,16 +46,18 @@ function buildM3u8FromMeshify(data, ch) {
 }
 
 async function findYallaUrl(ch) {
+  const yallaHeaders = {
+    Origin:  'https://vip.kora-top.zip',
+    Referer: 'https://vip.kora-top.zip/',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+  }
+
   for (const domain of YALLA_DOMAINS) {
     const url = `https://${domain}/hls/${ch}/master.m3u8`
     try {
       const res = await fetch(url, {
         method: 'HEAD',
-        headers: {
-          'Origin':  'https://vv.shootwithyalla.com',
-          'Referer': 'https://vv.shootwithyalla.com/',
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        },
+        headers: yallaHeaders,
       })
       if (res.ok) return url
     } catch {

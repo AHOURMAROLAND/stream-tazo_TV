@@ -18,8 +18,8 @@ export default async function handler(req, res) {
 
   try {
     const [matchesRes, spaRes] = await Promise.all([
-      fetch(`https://kora-api.space/api/matches/${today}/1?t=${Date.now()}`),
-      fetch(`${origin}/_spa`),
+      fetchWithTimeout(`https://kora-api.space/api/matches/${today}/1?t=${Date.now()}`, 5000),
+      fetchWithTimeout(`${origin}/_spa`, 5000),
     ])
 
     const data  = await matchesRes.json()
@@ -69,13 +69,24 @@ export default async function handler(req, res) {
     res.send(html)
   } catch (err) {
     console.error('[api/home]', err)
+    // Try to serve SPA shell without OG tags as fallback
     try {
-      const spaRes = await fetch(`${origin}/_spa`)
+      const spaRes = await fetchWithTimeout(`${origin}/_spa`, 5000)
       const html   = await spaRes.text()
       res.setHeader('Content-Type', 'text/html; charset=utf-8')
       res.send(html)
-    } catch {
+    } catch (fallbackErr) {
+      console.error('[api/home] fallback failed', fallbackErr)
       res.status(302).setHeader('Location', '/?_fb=1').end()
     }
   }
+}
+
+// Helper function for fetch with timeout
+function fetchWithTimeout(url, timeoutMs = 5000) {
+  const controller = new AbortController()
+  const id = setTimeout(() => controller.abort(), timeoutMs)
+  return fetch(url, {
+    signal: controller.signal,
+  }).finally(() => clearTimeout(id))
 }

@@ -23,17 +23,23 @@ export default async function handler(req, res) {
   const isYalla = target.includes('yallashoooootlive') || target.includes('yallashootttv') ||
                   target.includes('shootwithyalla') || target.includes('yallaliveshoot') ||
                   target.includes('kora-live-live') || target.includes('yallaliveshoot.info')
-  const referer = isYalla ? 'https://vv.shootwithyalla.com/' : 'https://vip.kora-top.zip/'
-  const origin  = isYalla ? 'https://vv.shootwithyalla.com'  : 'https://vip.kora-top.zip'
+  const refererHeader = isYalla ? 'https://vv.shootwithyalla.com/' : 'https://vip.kora-top.zip/'
+  const originHeader  = isYalla ? 'https://vv.shootwithyalla.com'  : 'https://vip.kora-top.zip'
 
   try {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 15000) // 15 s timeout
+
     const response = await fetch(target, {
+      signal: controller.signal,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Referer':    referer,
-        'Origin':     origin,
+        'Referer':    refererHeader,
+        'Origin':     originHeader,
       },
     })
+
+    clearTimeout(timeoutId)
 
     const contentType = response.headers.get('content-type') || ''
     res.setHeader('Content-Type', contentType)
@@ -66,8 +72,11 @@ export default async function handler(req, res) {
     // Sinon streamer les bytes directement (.ts, .key)
     const buffer = await response.arrayBuffer()
     return res.status(200).send(Buffer.from(buffer))
-
   } catch (e) {
+    if (e.name === 'AbortError') {
+      console.error('[PROXY] Request timed out')
+      return res.status(504).json({ error: 'Upstream request timeout' })
+    }
     console.error('[PROXY]', e.message)
     return res.status(500).json({ error: e.message })
   }

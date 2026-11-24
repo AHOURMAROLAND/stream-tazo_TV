@@ -1,26 +1,2 @@
-# TAZO TV 📺
-
-Site d'agrégation de streams de matchs de football en direct.
-
-## Stack
-- React 18 + Vite
-- TailwindCSS
-- Zustand
-- hls.js
-- Axios + React Router v6
-
-## API
-- Matchs : `kora-api.space`
-- Streams : `us.meshify.cloud`
-- Logos : `cdn.kora-api.space`
-
-## Lancer le projet
-```bash
-npm install
-npm run dev
-```
-
-## Build
-```bash
-npm run build
-```
+const API_KEY = process.env.APIFOOTBALL_KEY
+  const IS_RAPID_API = API_KEY?.length > 40 || process.env.USE_RAPIDAPI === 'true'

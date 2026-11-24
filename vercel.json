@@ -1,31 +1,6 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "framework": "vite",
   "rewrites": [
-    { "source": "/match/:id", "destination": "/api/match?id=:id" },
-    { "source": "/",          "destination": "/api/home"          },
-    { "source": "/_spa",      "destination": "/index.html"        },
-    { "source": "/(.*)",      "destination": "/index.html"        }
-  ],
-  "functions": {
-    "api/proxy.js": {
-      "maxDuration": 30
-    },
-    "api/stream.js": {
-      "maxDuration": 15
-    },
-    "api/match.js": {
-      "maxDuration": 10
-    },
-    "api/home.js": {
-      "maxDuration": 10
-    },
-    "api/og-home.js": {
-      "maxDuration": 10
-    },
-    "api/og.js": {
-      "maxDuration": 10
-    }
-  }
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
